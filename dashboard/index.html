@@ -293,52 +293,67 @@
          * Importante: Um único atendimento (1 linha na planilha) pode gerar MULTIPLAS linhas no `globalAtendimentos`
          * caso o contribuinte tenha feito múltiplos serviços no mesmo dia.
          */
+        // Função auxiliar para busca de colunas sem se preocupar com acentos ou maiúsculas
+        const limparTexto = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
+
         function processarDadosBrutos(rawData) {
             globalAtendimentos = [];
             let anosEncontrados = new Set(); 
             let municipiosEncontrados = new Set();
 
             rawData.forEach((row, index) => {
-                // Identificadores de colunas flexíveis (buscando por palavras-chave em vez de nomes exatos)
-                const dateKey = Object.keys(row).find(k => k && (k.toLowerCase().includes('data de atendimento') || k.toLowerCase().includes('carimbo')));
-                if (!dateKey) return; 
+                const colunas = Object.keys(row);
 
-                const rawDate = String(row[dateKey] || "").trim();
+                // 1. Localização Inteligente de Colunas (Prioriza "Data de Atendimento")
+                const keyAtendimento = colunas.find(k => limparTexto(k).includes('data de atendimento'));
+                const keyCarimbo = colunas.find(k => limparTexto(k).includes('carimbo'));
+
+                let rawDate = "";
+                
+                if (keyAtendimento && String(row[keyAtendimento] || "").trim() !== "") {
+                    rawDate = String(row[keyAtendimento]).trim(); // Tenta a data real primeiro
+                } else if (keyCarimbo) {
+                    rawDate = String(row[keyCarimbo]).trim(); // Usa o carimbo como plano B
+                }
+                
+                // --- TRAVA DE DATA VAZIA E CABEÇALHOS ---
+                // Se a data estiver vazia, não tiver números ou for o cabeçalho, pula a linha
                 if (!rawDate || !/\d/.test(rawDate) || rawDate.toLowerCase().includes('carimbo')) return; 
 
-                const folhasKey = Object.keys(row).find(k => k && k.toLowerCase().includes('folhas'));
-                const tipoKey = Object.keys(row).find(k => k && k.toLowerCase().includes('tipo de atendimento') && !k.toLowerCase().includes('usuário'));
-                const outroKey = Object.keys(row).find(k => k && k.toLowerCase().includes('respondeu outro'));
-                const sexoKey = Object.keys(row).find(k => k && (k.toLowerCase() === 'sexo' || k.toLowerCase().includes('sexo')));
-                const conclusivoKey = Object.keys(row).find(k => k && k.toLowerCase().includes('conclusivo'));
-                const municipioKey = Object.keys(row).find(k => k && k.toLowerCase().includes('município'));
-                const tipoUserKey = Object.keys(row).find(k => k && k.toLowerCase().includes('tipo de usuário'));
-                const idadeKey = Object.keys(row).find(k => k && k.toLowerCase() === 'idade');
+                // Localiza as demais chaves com a mesma lógica de proteção
+                const folhasKey = colunas.find(k => limparTexto(k).includes('folhas'));
+                const tipoKey = colunas.find(k => limparTexto(k).includes('tipo de atendimento') && !limparTexto(k).includes('usuario'));
+                const outroKey = colunas.find(k => limparTexto(k).includes('respondeu outro'));
+                const sexoKey = colunas.find(k => limparTexto(k).includes('sexo'));
+                const conclusivoKey = colunas.find(k => limparTexto(k).includes('conclusivo'));
+                const municipioKey = colunas.find(k => limparTexto(k).includes('municipio'));
+                const tipoUserKey = colunas.find(k => limparTexto(k).includes('tipo de usuario'));
+                const idadeKey = colunas.find(k => limparTexto(k) === 'idade');
 
-                // Tratamento de Datas
-                const dateParsed = extractDateString(rawDate);
+                // 2. Tratamento de Idade (Proteção contra NaN)
+                const idadeBruta = String(row[idadeKey] || "0").replace(/\D/g, '');
+                const idadeExtraida = parseInt(idadeBruta) || 0; 
+                const faixaEtaria = categorizarIdade(idadeExtraida, row[idadeKey]);
+
+                // 3. Tratamento de Datas e Municípios
+                const dateParsed = extractDateString(rawDate); // Agora usa o rawDate com prioridade
                 const anoExtraido = extrairAno(dateParsed);
                 const mesExtraido = extrairMes(dateParsed);
                 if (anoExtraido !== "Indefinido") anosEncontrados.add(anoExtraido);
 
-                // Tratamento de Textos
                 const municipioExtraido = normalizarStr(row[municipioKey]);
                 if (municipioExtraido) municipiosEncontrados.add(municipioExtraido);
                 
-                // Tratamento de Números (Idade e Folhas)
-                const idadeExtraida = parseInt(String(row[idadeKey] || "0").replace(/\D/g, ''));
-                const faixaEtaria = categorizarIdade(idadeExtraida, row[idadeKey]);
-
+                // 4. Volume de Folhas
                 const folhasStr = String(row[folhasKey] || "0");
                 const numerosEncontrados = folhasStr.match(/\d+/g); 
                 const numFolhas = numerosEncontrados ? Math.max(...numerosEncontrados.map(Number)) : 0;
 
+                // 5. Mapeamento de Serviços (Flattening)
                 const tiposStrOriginal = String(row[tipoKey] || "").toUpperCase();
                 const outroStrOriginal = String(row[outroKey] || "").toUpperCase();
-
                 let serviçosDestaLinha = [];
 
-                // 4.1. Auditor de Serviços: Analisa serviços assinalados
                 for (const [catNome, chaves] of Object.entries(categoriasDicionario)) {
                     if (catNome === "Outros") continue;
                     for (const chave of chaves) {
@@ -348,19 +363,14 @@
                     }
                 }
 
-                // 4.2. Tratamento do campo de texto livre "Outros"
                 if (outroStrOriginal.trim() !== "") {
                     serviçosDestaLinha.push({ categoria: "Outros", subcategoria: padronizarOutros(outroStrOriginal) });
                 }
 
-                // 4.3. Fallback de Segurança
                 if (serviçosDestaLinha.length === 0) {
                     serviçosDestaLinha.push({ categoria: "Outros", subcategoria: "NÃO ESPECIFICADO" });
                 }
 
-                // 4.4. Achata os dados ("Flattening")
-                // Registra uma linha independente para cada serviço prestado, mantendo o ID da linha (index)
-                // para cálculos posteriores (ex: contar pessoas únicas).
                 serviçosDestaLinha.forEach(servico => {
                     globalAtendimentos.push({
                         idLinha: index,
@@ -380,25 +390,17 @@
                 });
             });
 
-            // Popula os Selects com os dados mapeados
-            const fGlobalAno = document.getElementById('filter-ano');
-            const fGlobalMuni = document.getElementById('filter-municipio');
+            // Atualização dos filtros e interface
+            popularDropdown(document.getElementById('filter-ano'), Array.from(anosEncontrados).sort((a, b) => b - a)); 
+            popularDropdown(document.getElementById('filter-municipio'), Array.from(municipiosEncontrados).sort());
             const fPerfServico = document.getElementById('perf-servico');
-
-            popularDropdown(fGlobalAno, Array.from(anosEncontrados).sort((a, b) => b - a)); 
-            popularDropdown(fGlobalMuni, Array.from(municipiosEncontrados).sort());
             if(fPerfServico) popularDropdown(fPerfServico, Object.keys(categoriasDicionario));
 
-            // Troca da Tela de Loading para o Dashboard
             document.getElementById('empty-state').style.display = 'none';
             document.getElementById('dashboard-content').style.display = 'block';
-            document.getElementById('global-filters-container').classList.remove('hidden');
-            document.getElementById('global-filters-container').classList.add('flex');
+            document.getElementById('global-filters-container').classList.replace('hidden', 'flex');
+            if(document.getElementById('btn-toggle-labels')) document.getElementById('btn-toggle-labels').classList.remove('hidden'); 
             
-            const btnToggleLabels = document.getElementById('btn-toggle-labels');
-            if(btnToggleLabels) btnToggleLabels.classList.remove('hidden'); 
-            
-            // Renderiza os gráficos iniciais
             renderizarDashboard();
         }
 
@@ -454,13 +456,19 @@
                 el.classList.remove('active-tab', 'border-blue-800', 'text-blue-900', 'bg-blue-50', 'font-semibold');
                 el.classList.add('border-transparent', 'text-slate-500', 'font-medium');
             });
+            
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
             const activeBtn = document.getElementById(`nav-${tabId}`);
-            activeBtn.classList.remove('border-transparent', 'text-slate-500', 'font-medium');
             activeBtn.classList.add('active-tab', 'border-blue-800', 'text-blue-900', 'bg-blue-50', 'font-semibold');
             
-            // Só renderiza o conteúdo da aba atual para otimizar desempenho
             renderizarDashboard();
+
+            // Pequeno atraso para garantir que o elemento esteja visível antes do redimensionamento
+            setTimeout(() => {
+                Object.values(chartInstances).forEach(chart => {
+                    if (typeof chart.resize === 'function') chart.resize();
+                });
+            }, 60);
         }
 
         // ==========================================
@@ -676,12 +684,26 @@
             // Gráfico de Faixa Etária
             const mapIdade = {"Até 25":0, "26 a 40":0, "41 a 60":0, "Acima de 60":0, "Não Informado":0};
             const idadePorPessoa = {}; 
-            dadosLocais.forEach(d => { if(!idadePorPessoa[d.idLinha]) idadePorPessoa[d.idLinha] = d.idadeFaixa; });
-            Object.values(idadePorPessoa).forEach(faixa => { if(mapIdade[faixa] !== undefined) mapIdade[faixa]++; });
-            
+
+            dadosLocais.forEach(d => { 
+                if(!idadePorPessoa[d.idLinha]) idadePorPessoa[d.idLinha] = d.idadeFaixa; 
+            });
+
+            Object.values(idadePorPessoa).forEach(faixa => { 
+                if(mapIdade[faixa] !== undefined) mapIdade[faixa]++; 
+            });
+
+            // --- NOVA TRAVA: Remove "Não Informado" da legenda se for ZERO ---
+            if (mapIdade["Não Informado"] === 0) {
+                delete mapIdade["Não Informado"];
+            }
+
             const temIdade = Object.values(mapIdade).some(v => v > 0);
             toggleEmptyState('chartIdade', temIdade);
-            if (temIdade) criarGrafico('chartIdade', 'bar', Object.keys(mapIdade), Object.values(mapIdade), 'Pessoas', '#0d9488', false);
+
+            if (temIdade) {
+                criarGrafico('chartIdade', 'bar', Object.keys(mapIdade), Object.values(mapIdade), 'Pessoas', '#0d9488', false);
+            }
 
             // Gráfico de Municípios
             const muniComIds = {};
