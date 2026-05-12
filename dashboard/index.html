@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard NAF - Analytics Center</title>
+    
+    <style>
+        /*! tailwindcss v4.3.0 | MIT License | https://tailwindcss.com */
+        @layer properties{@supports (((-webkit-hyphens:none)) and (not (margin-trim:inline))) or ((-moz-orient:inline) and (not (color:rgb(from red r g b)))){*,:before,:after,::backdrop{--tw-space-x-reverse:0;--tw-border-style:solid;--tw-leading:initial;--tw-font-weight:initial;--tw-tracking:initial;--tw-shadow:0 0 #0000;--tw-shadow-color:initial;--tw-shadow-alpha:100%;--tw-inset-shadow:0 0 #0000;--tw-inset-shadow-color:initial;--tw-inset-shadow-alpha:100%;--tw-ring-color:initial;--tw-ring-shadow:0 0 #0000;--tw-inset-ring-color:initial;--tw-inset-ring-shadow:0 0 #0000;--tw-ring-inset:initial;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-offset-shadow:0 0 #0000}}}@layer theme{:root,:host{--font-sans:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";--font-mono:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;--color-red-500:oklch(63.7% .237 25.331);--color-red-600:oklch(57.7% .245 27.325);--color-yellow-100:oklch(97.3% .071 103.193);--color-yellow-300:oklch(90.5% .182 98.111);--color-emerald-500:oklch(69.6% .17 162.48);--color-sky-500:oklch(68.5% .169 237.323);--color-blue-50:oklch(97% .014 254.604);--color-blue-200:oklch(88.2% .059 254.128);--color-blue-400:oklch(70.7% .165 254.624);--color-blue-500:oklch(62.3% .214 259.815);--color-blue-600:oklch(54.6% .245 262.881);--color-blue-700:oklch(48.8% .243 264.376);--color-blue-800:oklch(42.4% .199 265.638);--color-blue-900:oklch(37.9% .146 265.522);--color-indigo-50:oklch(96.2% .018 272.314);--color-indigo-100:oklch(93% .034 272.788);--color-indigo-400:oklch(67.3% .182 276.935);--color-indigo-600:oklch(51.1% .262 276.966);--color-indigo-800:oklch(39.8% .195 277.366);--color-indigo-900:oklch(35.9% .144 278.697);--color-slate-50:oklch(98.4% .003 247.858);--color-slate-100:oklch(96.8% .007 247.896);--color-slate-200:oklch(92.9% .013 255.508);--color-slate-300:oklch(86.9% .022 252.894);--color-slate-400:oklch(70.4% .04 256.788);--color-slate-500:oklch(55.4% .046 257.417);--color-slate-600:oklch(44.6% .043 257.281);--color-slate-700:oklch(37.2% .044 257.287);--color-slate-800:oklch(27.9% .041 260.031);--color-white:#fff;--spacing:.25rem;--text-xs:.75rem;--text-xs--line-height:calc(1 / .75);--text-sm:.875rem;--text-sm--line-height:calc(1.25 / .875);--text-lg:1.125rem;--text-lg--line-height:calc(1.75 / 1.125);--text-xl:1.25rem;--text-xl--line-height:calc(1.75 / 1.25);--text-3xl:1.875rem;--text-3xl--line-height:calc(2.25 / 1.875);--font-weight-normal:400;--font-weight-medium:500;--font-weight-semibold:600;--font-weight-bold:700;--tracking-wide:.025em;--tracking-wider:.05em;--radius-lg:.5rem;--radius-xl:.75rem;--animate-spin:spin 1s linear infinite;--default-transition-duration:.15s;--default-transition-timing-function:cubic-bezier(.4, 0, .2, 1);--default-font-family:var(--font-sans);--default-mono-font-family:var(--font-mono)}}@layer base{*,:after,:before,::backdrop{box-sizing:border-box;border:0 solid;margin:0;padding:0}::file-selector-button{box-sizing:border-box;border:0 solid;margin:0;padding:0}html,:host{-webkit-text-size-adjust:100%;tab-size:4;line-height:1.5;font-family:var(--default-font-family,ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");font-feature-settings:var(--default-font-feature-settings,normal);font-variation-settings:var(--default-font-variation-settings,normal);-webkit-tap-highlight-color:transparent}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;-webkit-text-decoration:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:var(--default-mono-font-family,ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);font-feature-settings:var(--default-mono-font-feature-settings,normal);font-variation-settings:var(--default-mono-font-variation-settings,normal);font-size:1em}small{font-size:80%}sub,sup{vertical-align:baseline;font-size:75%;line-height:0;position:relative}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}ol,ul,menu{list-style:none}img,svg,video,canvas,audio,iframe,embed,object{vertical-align:middle;display:block}img,video{max-width:100%;height:auto}button,input,select,optgroup,textarea{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;opacity:1;background-color:#0000;border-radius:0}::file-selector-button{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;opacity:1;background-color:#0000;border-radius:0}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::placeholder{opacity:1}@supports (not ((-webkit-appearance:-apple-pay-button))) or (contain-intrinsic-size:1px){::placeholder{color:currentColor}@supports (color:color-mix(in lab, red, red)){::placeholder{color:color-mix(in oklab, currentcolor 50%, transparent)}}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit{padding-block:0}::-webkit-datetime-edit-year-field{padding-block:0}::-webkit-datetime-edit-month-field{padding-block:0}::-webkit-datetime-edit-day-field{padding-block:0}::-webkit-datetime-edit-hour-field{padding-block:0}::-webkit-datetime-edit-minute-field{padding-block:0}::-webkit-datetime-edit-second-field{padding-block:0}::-webkit-datetime-edit-millisecond-field{padding-block:0}::-webkit-datetime-edit-meridiem-field{padding-block:0}::-webkit-calendar-picker-indicator{line-height:1}:-moz-ui-invalid{box-shadow:none}button,input:where([type=button],[type=reset],[type=submit]){appearance:button}::file-selector-button{appearance:button}::-webkit-inner-spin-button{height:auto}::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}}@layer components;@layer utilities{.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:calc(var(--spacing) * 0)}.top-0{top:calc(var(--spacing) * 0)}.z-10{z-index:10}.z-50{z-index:50}.container{width:100%}@media (min-width:40rem){.container{max-width:40rem}}@media (min-width:48rem){.container{max-width:48rem}}@media (min-width:64rem){.container{max-width:64rem}}@media (min-width:80rem){.container{max-width:80rem}}@media (min-width:96rem){.container{max-width:96rem}}.mx-auto{margin-inline:auto}.mt-0\.5{margin-top:calc(var(--spacing) * .5)}.mt-2{margin-top:calc(var(--spacing) * 2)}.mt-32{margin-top:calc(var(--spacing) * 32)}.mr-2{margin-right:calc(var(--spacing) * 2)}.mb-1{margin-bottom:calc(var(--spacing) * 1)}.mb-4{margin-bottom:calc(var(--spacing) * 4)}.mb-6{margin-bottom:calc(var(--spacing) * 6)}.mb-8{margin-bottom:calc(var(--spacing) * 8)}.ml-1{margin-left:calc(var(--spacing) * 1)}.ml-2{margin-left:calc(var(--spacing) * 2)}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-4{height:calc(var(--spacing) * 4)}.h-5{height:calc(var(--spacing) * 5)}.h-16{height:calc(var(--spacing) * 16)}.h-80{height:calc(var(--spacing) * 80)}.h-\[240px\]{height:240px}.h-\[350px\]{height:350px}.h-\[400px\]{height:400px}.h-full{height:100%}.min-h-\[200px\]{min-height:200px}.min-h-screen{min-height:100vh}.w-4{width:calc(var(--spacing) * 4)}.w-5{width:calc(var(--spacing) * 5)}.w-16{width:calc(var(--spacing) * 16)}.w-full{width:100%}.max-w-\[160px\]{max-width:160px}.max-w-\[240px\]{max-width:240px}.flex-shrink-0,.shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.rotate-180{rotate:180deg}.animate-spin{animation:var(--animate-spin)}.cursor-pointer{cursor:pointer}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.items-end{align-items:flex-end}.items-start{align-items:flex-start}.justify-between{justify-content:space-between}.justify-center{justify-content:center}.gap-2{gap:calc(var(--spacing) * 2)}.gap-3{gap:calc(var(--spacing) * 3)}.gap-4{gap:calc(var(--spacing) * 4)}.gap-6{gap:calc(var(--spacing) * 6)}:where(.space-x-2>:not(:last-child)){--tw-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 2) * var(--tw-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 2) * calc(1 - var(--tw-space-x-reverse)))}.truncate{text-overflow:ellipsis;white-space:nowrap;overflow:hidden}.rounded{border-radius:.25rem}.rounded-full{border-radius:3.40282e38px}.rounded-lg{border-radius:var(--radius-lg)}.rounded-xl{border-radius:var(--radius-xl)}.rounded-t-lg{border-top-left-radius:var(--radius-lg);border-top-right-radius:var(--radius-lg)}.border{border-style:var(--tw-border-style);border-width:1px}.border-b{border-bottom-style:var(--tw-border-style);border-bottom-width:1px}.border-b-2{border-bottom-style:var(--tw-border-style);border-bottom-width:2px}.border-l-4{border-left-style:var(--tw-border-style);border-left-width:4px}.border-dashed{--tw-border-style:dashed;border-style:dashed}.border-blue-700{border-color:var(--color-blue-700)}.border-blue-700\/50{border-color:#1447e680}@supports (color:color-mix(in lab, red, red)){.border-blue-700\/50{border-color:color-mix(in oklab, var(--color-blue-700) 50%, transparent)}}.border-blue-800{border-color:var(--color-blue-800)}.border-indigo-100{border-color:var(--color-indigo-100)}.border-indigo-400{border-color:var(--color-indigo-400)}.border-slate-100{border-color:var(--color-slate-100)}.border-slate-200{border-color:var(--color-slate-200)}.border-slate-300{border-color:var(--color-slate-300)}.border-transparent{border-color:#0000}.border-l-blue-600{border-left-color:var(--color-blue-600)}.border-l-indigo-600{border-left-color:var(--color-indigo-600)}.border-l-sky-500{border-left-color:var(--color-sky-500)}.bg-blue-50{background-color:var(--color-blue-50)}.bg-blue-800{background-color:var(--color-blue-800)}.bg-blue-800\/50{background-color:#193cb880}@supports (color:color-mix(in lab, red, red)){.bg-blue-800\/50{background-color:color-mix(in oklab, var(--color-blue-800) 50%, transparent)}}.bg-blue-900{background-color:var(--color-blue-900)}.bg-indigo-50{background-color:var(--color-indigo-50)}.bg-indigo-100{background-color:var(--color-indigo-100)}.bg-slate-50{background-color:var(--color-slate-50)}.bg-slate-50\/80{background-color:#f8fafccc}@supports (color:color-mix(in lab, red, red)){.bg-slate-50\/80{background-color:color-mix(in oklab, var(--color-slate-50) 80%, transparent)}}.bg-slate-100{background-color:var(--color-slate-100)}.bg-white{background-color:var(--color-white)}.p-1\.5{padding:calc(var(--spacing) * 1.5)}.p-2{padding:calc(var(--spacing) * 2)}.p-3{padding:calc(var(--spacing) * 3)}.p-6{padding:calc(var(--spacing) * 6)}.px-2{padding-inline:calc(var(--spacing) * 2)}.px-3{padding-inline:calc(var(--spacing) * 3)}.px-4{padding-inline:calc(var(--spacing) * 4)}.px-6{padding-inline:calc(var(--spacing) * 6)}.py-1\.5{padding-block:calc(var(--spacing) * 1.5)}.py-3{padding-block:calc(var(--spacing) * 3)}.py-6{padding-block:calc(var(--spacing) * 6)}.text-center{text-align:center}.font-sans{font-family:var(--font-sans)}.text-3xl{font-size:var(--text-3xl);line-height:var(--tw-leading,var(--text-3xl--line-height))}.text-lg{font-size:var(--text-lg);line-height:var(--tw-leading,var(--text-lg--line-height))}.text-sm{font-size:var(--text-sm);line-height:var(--tw-leading,var(--text-sm--line-height))}.text-xl{font-size:var(--text-xl);line-height:var(--tw-leading,var(--text-xl--line-height))}.text-xs{font-size:var(--text-xs);line-height:var(--tw-leading,var(--text-xs--line-height))}.text-\[10px\]{font-size:10px}.leading-none{--tw-leading:1;line-height:1}.font-bold{--tw-font-weight:var(--font-weight-bold);font-weight:var(--font-weight-bold)}.font-medium{--tw-font-weight:var(--font-weight-medium);font-weight:var(--font-weight-medium)}.font-normal{--tw-font-weight:var(--font-weight-normal);font-weight:var(--font-weight-normal)}.font-semibold{--tw-font-weight:var(--font-weight-semibold);font-weight:var(--font-weight-semibold)}.tracking-wide{--tw-tracking:var(--tracking-wide);letter-spacing:var(--tracking-wide)}.tracking-wider{--tw-tracking:var(--tracking-wider);letter-spacing:var(--tracking-wider)}.whitespace-nowrap{white-space:nowrap}.text-blue-200{color:var(--color-blue-200)}.text-blue-600{color:var(--color-blue-600)}.text-blue-900{color:var(--color-blue-900)}.text-emerald-500{color:var(--color-emerald-500)}.text-indigo-800{color:var(--color-indigo-800)}.text-indigo-900{color:var(--color-indigo-900)}.text-red-500{color:var(--color-red-500)}.text-red-600{color:var(--color-red-600)}.text-slate-300{color:var(--color-slate-300)}.text-slate-400{color:var(--color-slate-400)}.text-slate-500{color:var(--color-slate-500)}.text-slate-600{color:var(--color-slate-600)}.text-slate-700{color:var(--color-slate-700)}.text-slate-800{color:var(--color-slate-800)}.text-white{color:var(--color-white)}.text-yellow-300{color:var(--color-yellow-300)}.uppercase{text-transform:uppercase}.underline{text-decoration-line:underline}.opacity-25{opacity:.25}.opacity-75{opacity:.75}.opacity-80{opacity:.8}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 var(--tw-shadow-color,#0000000d);box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px var(--tw-shadow-color,#0000001a), 0 2px 4px -2px var(--tw-shadow-color,#0000001a);box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 3px 0 var(--tw-shadow-color,#0000001a), 0 1px 2px -1px var(--tw-shadow-color,#0000001a);box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)}.transition{transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to,opacity,box-shadow,transform,translate,scale,rotate,filter,-webkit-backdrop-filter,backdrop-filter,display,content-visibility,overlay,pointer-events;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));transition-duration:var(--tw-duration,var(--default-transition-duration))}.transition-all{transition-property:all;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));transition-duration:var(--tw-duration,var(--default-transition-duration))}.transition-colors{transition-property:color,background-color,border-color,outline-color,text-decoration-color,fill,stroke,--tw-gradient-from,--tw-gradient-via,--tw-gradient-to;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));transition-duration:var(--tw-duration,var(--default-transition-duration))}.transition-transform{transition-property:transform,translate,scale,rotate;transition-timing-function:var(--tw-ease,var(--default-transition-timing-function));transition-duration:var(--tw-duration,var(--default-transition-duration))}.outline-none{--tw-outline-style:none;outline-style:none}@media (hover:hover){.hover\:bg-blue-700:hover{background-color:var(--color-blue-700)}.hover\:bg-slate-50:hover{background-color:var(--color-slate-50)}.hover\:text-blue-800:hover{color:var(--color-blue-800)}.hover\:text-slate-800:hover{color:var(--color-slate-800)}.hover\:text-white:hover{color:var(--color-white)}.hover\:text-yellow-100:hover{color:var(--color-yellow-100)}}.focus\:ring-2:focus{--tw-ring-shadow:var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color,currentcolor);box-shadow:var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)}.focus\:ring-blue-400:focus{--tw-ring-color:var(--color-blue-400)}.focus\:ring-blue-500:focus{--tw-ring-color:var(--color-blue-500)}@media (min-width:40rem){.sm\:items-center{align-items:center}}@media (min-width:48rem){.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}:where(.md\:space-x-4>:not(:last-child)){--tw-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 4) * var(--tw-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 4) * calc(1 - var(--tw-space-x-reverse)))}}@media (min-width:64rem){.lg\:col-span-2{grid-column:span 2/span 2}.lg\:col-span-3{grid-column:span 3/span 3}.lg\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.lg\:flex-row{flex-direction:row}:where(.lg\:space-x-4>:not(:last-child)){--tw-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 4) * var(--tw-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 4) * calc(1 - var(--tw-space-x-reverse)))}.lg\:text-left{text-align:left}}}@property --tw-space-x-reverse{syntax:"*";inherits:false;initial-value:0}@property --tw-border-style{syntax:"*";inherits:false;initial-value:solid}@property --tw-leading{syntax:"*";inherits:false}@property --tw-font-weight{syntax:"*";inherits:false}@property --tw-tracking{syntax:"*";inherits:false}@property --tw-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-shadow-color{syntax:"*";inherits:false}@property --tw-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-shadow-color{syntax:"*";inherits:false}@property --tw-inset-shadow-alpha{syntax:"<percentage>";inherits:false;initial-value:100%}@property --tw-ring-color{syntax:"*";inherits:false}@property --tw-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-inset-ring-color{syntax:"*";inherits:false}@property --tw-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@property --tw-ring-inset{syntax:"*";inherits:false}@property --tw-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0}@property --tw-ring-offset-color{syntax:"*";inherits:false;initial-value:#fff}@property --tw-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000}@keyframes spin{to{transform:rotate(360deg)}}
+    </style>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+
+    <header class="bg-blue-900 text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-3 flex flex-col lg:flex-row justify-between items-center gap-4">
+            
+            <div class="flex-shrink-0 text-center lg:text-left">
+                <h1 class="text-xl font-bold">Dashboard Analítico NAF</h1>
+                <p class="text-xs text-blue-200">Conectado ao Google Sheets • Nuvem</p>
+            </div>
+
+            <div id="global-filters-container" class="hidden flex-grow justify-center items-center">
+                <div class="flex flex-wrap justify-center items-center gap-2 bg-blue-800/50 px-3 py-1.5 rounded-lg border border-blue-700/50 shadow-inner">
+                    <select id="filter-ano" class="bg-blue-900 border border-blue-700 text-white text-sm rounded focus:ring-2 focus:ring-blue-400 p-1.5 global-filter outline-none cursor-pointer">
+                        <option value="ALL">Ano: Todos</option>
+                    </select>
+                    <select id="filter-mes" class="bg-blue-900 border border-blue-700 text-white text-sm rounded focus:ring-2 focus:ring-blue-400 p-1.5 global-filter outline-none cursor-pointer">
+                        <option value="ALL">Mês: Todos</option>
+                        <option value="01">Jan</option><option value="02">Fev</option><option value="03">Mar</option>
+                        <option value="04">Abr</option><option value="05">Mai</option><option value="06">Jun</option>
+                        <option value="07">Jul</option><option value="08">Ago</option><option value="09">Set</option>
+                        <option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
+                    </select>
+                    <select id="filter-municipio" class="bg-blue-900 border border-blue-700 text-white text-sm rounded focus:ring-2 focus:ring-blue-400 p-1.5 max-w-[160px] truncate global-filter outline-none cursor-pointer">
+                        <option value="ALL">Município: Todos</option>
+                    </select>
+                    <button id="btn-reset" class="text-xs text-blue-200 hover:text-white font-medium underline ml-1 px-2" title="Limpar Filtros">Limpar</button>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 lg:space-x-4 flex-shrink-0">
+                <button id="btn-toggle-labels" class="hidden p-2 bg-blue-800 hover:bg-blue-700 text-blue-200 hover:text-white rounded transition shadow-inner flex items-center justify-center" title="Mostrar Números nos Gráficos">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="empty-state" class="flex flex-col items-center justify-center mt-32">
+        <div id="empty-state-icon">
+            <svg class="animate-spin h-16 w-16 text-blue-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        </div>
+        <h2 id="empty-state-title" class="text-xl font-semibold text-slate-600">Conectando ao banco de dados...</h2>
+        <p id="empty-state-desc" class="text-slate-400 text-sm mt-2">Puxando informações atualizadas em tempo real da Planilha.</p>
+    </div>
+
+    <main class="container mx-auto px-6 py-6 hidden" id="dashboard-content">
+
+        <div class="border-b border-slate-200 mb-6 flex justify-center px-4">
+            <nav class="flex space-x-2 md:space-x-4" aria-label="Tabs">
+                <button onclick="switchTab('geral')" id="nav-geral" class="tab-btn active-tab border-blue-800 text-blue-900 bg-blue-50 rounded-t-lg whitespace-nowrap py-3 px-4 border-b-2 font-semibold text-sm transition-all">Geral</button>
+                <button onclick="switchTab('operacional')" id="nav-operacional" class="tab-btn border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-t-lg whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm transition-all">Operacional (Serviços)</button>
+                <button onclick="switchTab('perfil')" id="nav-perfil" class="tab-btn border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-t-lg whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm transition-all">Perfil do Contribuinte</button>
+            </nav>
+        </div>
+
+        <div id="tab-geral" class="tab-content block">
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm border-l-4 border-l-blue-600 relative">
+                    <h3 class="text-slate-500 text-sm font-semibold mb-1">Pessoas Atendidas</h3>
+                    <div class="flex items-end gap-3">
+                        <p class="text-3xl font-bold text-slate-800" id="kpi-total">0</p>
+                        <span id="kpi-total-growth" class="text-xs font-medium mb-1"></span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2">Registros únicos na linha do tempo</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm border-l-4 border-l-sky-500 relative">
+                    <h3 class="text-slate-500 text-sm font-semibold mb-1">Pessoas Contribuintes MEI</h3>
+                    <div class="flex items-end gap-3">
+                        <p class="text-3xl font-bold text-slate-800" id="kpi-mei">0</p>
+                        <span id="kpi-mei-growth" class="text-xs font-medium mb-1"></span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2">Demandaram Abertura ou DASN</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm border-l-4 border-l-indigo-600 relative">
+                    <h3 class="text-slate-500 text-sm font-semibold mb-1">Folhas Impressas</h3>
+                    <div class="flex items-end gap-3">
+                        <p class="text-3xl font-bold text-slate-800" id="kpi-folhas">0</p>
+                        <span id="kpi-folhas-growth" class="text-xs font-medium mb-1"></span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2">Volume total gerado no período</p>
+                </div>
+            </section>
+
+            <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-8">
+                <h3 class="text-md font-bold text-slate-700 mb-4">Evolução Histórica de Atendimentos</h3>
+                <div class="relative h-80 w-full flex flex-col justify-center">
+                    <canvas id="chartEvolucao"></canvas>
+                    <div id="empty-chartEvolucao" class="hidden absolute inset-0 flex-col items-center justify-center bg-slate-50/80 rounded-lg border border-dashed border-slate-200 z-10">
+                        <span class="text-sm text-slate-500 font-medium">Nenhum dado para este período</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div id="tab-operacional" class="tab-content hidden">
+            <div class="bg-slate-100 p-3 rounded-lg mb-6 flex gap-4 items-center">
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Filtro Específico:</span>
+                <select id="op-conclusao" class="bg-white border border-slate-300 text-sm rounded focus:ring-blue-500 p-1.5 local-filter-op">
+                    <option value="ALL">Status: Todos</option>
+                    <option value="SIM">Conclusivo (Sim)</option>
+                    <option value="NÃO">Não Conclusivo (Não)</option>
+                </select>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 w-full mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-md font-bold text-slate-700">Volume de Serviços Prestados</h3>
+                    <button id="btn-toggle-cat" class="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center transition-colors bg-blue-50 px-3 py-1.5 rounded-full">
+                        Detalhar Outros
+                        <svg class="w-4 h-4 ml-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                </div>
+                <div class="relative h-[400px] flex flex-col justify-center">
+                    <canvas id="chartCategorias"></canvas>
+                    <div id="empty-chartCategorias" class="hidden absolute inset-0 flex-col items-center justify-center bg-slate-50/80 rounded-lg border border-dashed border-slate-200 z-10">
+                        <span class="text-sm text-slate-500 font-medium">Nenhum serviço atende a estes filtros</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-perfil" class="tab-content hidden">
+            <div class="bg-slate-100 p-3 rounded-lg mb-6 flex flex-wrap gap-4 items-center">
+                <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Cruzar Dados:</span>
+                <select id="perf-servico" class="bg-white border border-slate-300 text-sm rounded focus:ring-blue-500 p-1.5 local-filter-perf"><option value="ALL">Serviço: Todos</option></select>
+                <select id="perf-tipo" class="bg-white border border-slate-300 text-sm rounded focus:ring-blue-500 p-1.5 local-filter-perf"><option value="ALL">Público: Todos</option><option value="PESSOA FÍSICA">Pessoa Física</option><option value="PESSOA JURÍDICA">Pessoa Jurídica</option></select>
+                <select id="perf-conclusao" class="bg-white border border-slate-300 text-sm rounded focus:ring-blue-500 p-1.5 local-filter-perf"><option value="ALL">Status: Todos</option><option value="SIM">Conclusivo</option><option value="NÃO">Não Conclusivo</option></select>
+                <select id="perf-genero" class="bg-white border border-slate-300 text-sm rounded focus:ring-blue-500 p-1.5 local-filter-perf"><option value="ALL">Gênero: Todos</option><option value="MASCULINO">Masculino</option><option value="FEMININO">Feminino</option></select>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col h-full">
+                    <h3 class="text-md font-bold text-slate-700 mb-4 flex-shrink-0">Distribuição de Gênero</h3>
+                    <div class="flex-grow w-full flex flex-col items-center justify-center">
+                        <div class="relative w-full max-w-[240px] h-[240px]">
+                            <canvas id="chartGenero"></canvas>
+                            <div id="empty-chartGenero" class="hidden absolute inset-0 flex-col items-center justify-center bg-slate-50/80 rounded-lg border border-dashed border-slate-200 z-10"><span class="text-xs text-slate-400 font-medium">Sem dados</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 lg:col-span-2 flex flex-col">
+                    <div class="flex justify-between items-start sm:items-center mb-4 gap-2">
+                        <h3 class="text-md font-bold text-slate-700">Faixa Etária</h3>
+                        <div class="bg-indigo-50 border border-indigo-100 text-indigo-800 px-3 py-1.5 rounded-lg flex items-center shadow-sm shrink-0">
+                            <span class="text-[10px] font-bold uppercase tracking-wider mr-2 opacity-80">Média:</span>
+                            <span class="text-lg font-bold leading-none" id="kpi-media-idade">0</span>
+                            <span class="text-xs font-normal ml-1 mt-0.5">anos</span>
+                        </div>
+                    </div>
+                    <div class="relative flex-grow min-h-[200px] flex flex-col justify-center">
+                        <canvas id="chartIdade"></canvas>
+                        <div id="empty-chartIdade" class="hidden absolute inset-0 flex-col items-center justify-center bg-slate-50/80 rounded-lg border border-dashed border-slate-200 z-10"><span class="text-xs text-slate-400 font-medium">Nenhuma faixa etária mapeada</span></div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 lg:col-span-3">
+                    <h3 class="text-md font-bold text-slate-700 mb-4">Alcance Geográfico (Municípios)</h3>
+                    <div class="relative h-[350px] flex flex-col justify-center">
+                        <canvas id="chartMunicipios"></canvas>
+                        <div id="empty-chartMunicipios" class="hidden absolute inset-0 flex-col items-center justify-center bg-slate-50/80 rounded-lg border border-dashed border-slate-200 z-10"><span class="text-sm text-slate-500 font-medium">Nenhum alcance geográfico encontrado</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        /**
+         * 1. DICIONÁRIO DE CATEGORIAS
+         * Mapeia as respostas exatas do Google Forms para Categorias de "Guarda-chuva" maiores.
+         * Isso ajuda a condensar dezenas de serviços específicos em blocos analíticos úteis.
+         */
+        const categoriasDicionario = {
+            "Imposto de Renda (IRPF)": [
+                "AUXÍLIO À ELABORAÇÃO E ORIENTAÇÕES SOBRE A DECLARAÇÃO DE AJUSTE ANUAL DO IRPF",
+                "INFORMAÇÕES E AUXÍLIO À ELABORAÇÃO DE PEDIDO DE ISENÇÃO DE IRPF PARA PORTADORES DE MOLÉSTIAS GRAVES",
+                "INFORMAÇÕES GERAIS SOBRE ITR"
+            ],
+            "Cadastros (CPF e CNPJ)": [
+                "AUXÍLIO À INSCRIÇÃO E INFORMAÇÕES CADASTRAIS DE CPF",
+                "AUXÍLIO À INSCRIÇÃO E INFORMAÇÕES CADASTRAIS DO CNPJ",
+                "INFORMAÇÕES E AUXÍLIO À REGULARIZAÇÃO DE CPF SUSPENSO",
+                "AUXÍLIO À INSCRIÇÃO E INFORMAÇÕES CADASTRAIS DA MATRÍCULA CEI"
+            ],
+            "Certidões e Situação Fiscal": [
+                "AUXÍLIO À EMISSÃO E INFORMAÇÕES SOBRE CERTIDÕES NEGATIVAS DE DÉBITOS PF E PJ",
+                "AUXÍLIO À CONSULTA À SITUAÇÃO FISCAL",
+                "AGENDAMENTO ON-LINE DE ATENDIMENTOS NA RFB"
+            ],
+            "MEI e Simples Nacional": [
+                "AUXÍLIO À INSCRIÇÃO E INFORMAÇÕES GERAIS SOBRE O MICROEMPREENDEDOR INDIVIDUAL",
+                "AUXÍLIO À INSCRIÇÃO E INFORMAÇÕES GERAIS SOBRE O SIMPLES NACIONAL"
+            ],
+            "Restituições e Isenções": [
+                "AUXÍLIO À APRESENTAÇÃO DE PEDIDOS DE RESTITUIÇÃO DE PAGAMENTOS INDEVIDOS E/OU A MAIOR (PERDCOMPS)",
+                "ORIENTAÇÕES E AUXÍLIO À ELABORAÇÃO DE PEDIDOS DE ISENÇÃO DE IPI/IOF NA COMPRA DE VEÍCULOS POR PORTADORES DE DEFICIÊNCIA FÍSICA, MENTAL OU VISUAL"
+            ],
+            "Previdência e eSocial": [
+                "INFORMAÇÕES E AUXÍLIO NO ESOCIAL DO EMPREGADOR DOMÉSTICO",
+                "AUXÍLIO À EMISSÃO E INFORMAÇÕES SOBRE GUIAS PARA O RECOLHIMENTO DA CONTRIBUIÇÃO PREVIDENCIÁRIA DE PRODUTORES RURAIS PESSOA FÍSICA, SEGURADO ESPECIAL, CONTRIBUINTE INDIVIDUAL E OBRAS DE PESSOAS FÍSICAS"
+            ],
+            "Apoio e Sistemas": [
+                "ORIENTAÇÕES E AUXÍLIO AO CUMPRIMENTO DE OBRIGAÇÕES TRIBUTÁRIAS ACESSÓRIAS PARA ASSOCIAÇÕES E DEMAIS ENTIDADES SEM FINS LUCRATIVOS",
+                "INFORMAÇÕES E AUXILIO PARA A OBTENÇÃO DE CERTIFICADO DIGITAL;",
+                "INFORMAÇÕES E AUXILIO PARA REALIZAR A OPÇÃO PELO DOMICÍLIO TRIBUTÁRIO ELETRÔNICO - DTE;"
+            ],
+            "Comércio Exterior": [
+                "AUXÍLIO À HABILITAÇÃO NOS SISTEMAS RADAR E SISCOMEX;",
+                "INFORMAÇÕES SOBRE REGRAS DE IMPORTAÇÃO E EXPORTAÇÃO ATRAVÉS DOS CORREIOS;",
+                "INFORMAÇÕES SOBRE REGRAS DE BAGAGEM."
+            ],
+            "Outros": [] // Tratado de forma dinâmica mais abaixo
+        };
+
+        // Variáveis Globais de Estado
+        let globalAtendimentos = []; // Armazena a base de dados tratada ("Livro Diário")
+        let chartInstances = {};     // Guarda referências dos gráficos do Chart.js para destruí-los/atualizá-los
+        let currentTab = 'geral';    // Aba ativa no momento
+        let viewSubcategorias = false; // Controle de visualização: Categorias principais vs "Outros" detalhados
+        let mostrarNumeros = false;  // Controle do toggle de DataLabels
+
+        // 2. CONFIGURAÇÃO GLOBAL DO CHART.JS
+        Chart.register(ChartDataLabels);
+        Chart.defaults.set('plugins.datalabels', {
+            color: '#475569',
+            font: { weight: 'bold', size: 11 },
+            align: 'end',
+            anchor: 'end',
+            formatter: Math.round,
+            display: function(context) { 
+                // Exibe o número apenas se o toggle estiver ativo e o valor for maior que 0
+                return mostrarNumeros && context.dataset.data[context.dataIndex] > 0; 
+            }
+        });
+
+        // 3. INICIALIZAÇÃO E COMUNICAÇÃO COM O APPS SCRIPT
+        document.addEventListener('DOMContentLoaded', () => {
+            const iconeVazio = document.getElementById('empty-state-icon');
+            const tituloVazio = document.getElementById('empty-state-title');
+            const descVazio = document.getElementById('empty-state-desc');
+
+            // Segurança: Se for aberto fora do GAS (ex: abrindo o HTML localmente no PC), avisa o erro
+            if (typeof google === 'undefined' || typeof google.script === 'undefined') {
+                iconeVazio.innerHTML = '<svg class="w-16 h-16 text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
+                tituloVazio.innerText = "Erro: Fora do Servidor";
+                descVazio.innerHTML = "O sistema foi aberto fora do ambiente Google Apps Script.";
+                tituloVazio.classList.add('text-red-600');
+                return;
+            }
+
+            // Chama a função do backend (codigo.gs)
+            google.script.run
+                .withSuccessHandler(function(dadosRetornados) {
+                    // Retorno Vazio
+                    if (!dadosRetornados || dadosRetornados.length === 0) {
+                        iconeVazio.innerHTML = '<svg class="w-16 h-16 text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>';
+                        tituloVazio.innerText = "Banco de Dados Vazio";
+                        descVazio.innerText = "Nenhum atendimento foi processado ainda.";
+                        return;
+                    }
+                    // Sucesso: Processa os dados
+                    processarDadosBrutos(dadosRetornados);
+                })
+                .withFailureHandler(function(erro) {
+                    // Retorno com Erro de Servidor
+                    iconeVazio.innerHTML = '<svg class="w-16 h-16 text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                    tituloVazio.innerText = "Falha na Leitura";
+                    descVazio.innerText = "Erro no servidor: " + erro.message;
+                    tituloVazio.classList.add('text-red-600');
+                })
+                .obterDadosPlanilha(); // Esta é a função declarada no codigo.gs
+        });
+
+        /**
+         * 4. PROCESSAMENTO DE DADOS (O MOTOR DO SISTEMA)
+         * Transforma os dados brutos da planilha em um array padronizado.
+         * Importante: Um único atendimento (1 linha na planilha) pode gerar MULTIPLAS linhas no `globalAtendimentos`
+         * caso o contribuinte tenha feito múltiplos serviços no mesmo dia.
+         */
+        function processarDadosBrutos(rawData) {
+            globalAtendimentos = [];
+            let anosEncontrados = new Set(); 
+            let municipiosEncontrados = new Set();
+
+            rawData.forEach((row, index) => {
+                // Identificadores de colunas flexíveis (buscando por palavras-chave em vez de nomes exatos)
+                const dateKey = Object.keys(row).find(k => k && (k.toLowerCase().includes('data de atendimento') || k.toLowerCase().includes('carimbo')));
+                if (!dateKey) return; 
+
+                const rawDate = String(row[dateKey] || "").trim();
+                if (!rawDate || !/\d/.test(rawDate) || rawDate.toLowerCase().includes('carimbo')) return; 
+
+                const folhasKey = Object.keys(row).find(k => k && k.toLowerCase().includes('folhas'));
+                const tipoKey = Object.keys(row).find(k => k && k.toLowerCase().includes('tipo de atendimento') && !k.toLowerCase().includes('usuário'));
+                const outroKey = Object.keys(row).find(k => k && k.toLowerCase().includes('respondeu outro'));
+                const sexoKey = Object.keys(row).find(k => k && (k.toLowerCase() === 'sexo' || k.toLowerCase().includes('sexo')));
+                const conclusivoKey = Object.keys(row).find(k => k && k.toLowerCase().includes('conclusivo'));
+                const municipioKey = Object.keys(row).find(k => k && k.toLowerCase().includes('município'));
+                const tipoUserKey = Object.keys(row).find(k => k && k.toLowerCase().includes('tipo de usuário'));
+                const idadeKey = Object.keys(row).find(k => k && k.toLowerCase() === 'idade');
+
+                // Tratamento de Datas
+                const dateParsed = extractDateString(rawDate);
+                const anoExtraido = extrairAno(dateParsed);
+                const mesExtraido = extrairMes(dateParsed);
+                if (anoExtraido !== "Indefinido") anosEncontrados.add(anoExtraido);
+
+                // Tratamento de Textos
+                const municipioExtraido = normalizarStr(row[municipioKey]);
+                if (municipioExtraido) municipiosEncontrados.add(municipioExtraido);
+                
+                // Tratamento de Números (Idade e Folhas)
+                const idadeExtraida = parseInt(String(row[idadeKey] || "0").replace(/\D/g, ''));
+                const faixaEtaria = categorizarIdade(idadeExtraida, row[idadeKey]);
+
+                const folhasStr = String(row[folhasKey] || "0");
+                const numerosEncontrados = folhasStr.match(/\d+/g); 
+                const numFolhas = numerosEncontrados ? Math.max(...numerosEncontrados.map(Number)) : 0;
+
+                const tiposStrOriginal = String(row[tipoKey] || "").toUpperCase();
+                const outroStrOriginal = String(row[outroKey] || "").toUpperCase();
+
+                let serviçosDestaLinha = [];
+
+                // 4.1. Auditor de Serviços: Analisa serviços assinalados
+                for (const [catNome, chaves] of Object.entries(categoriasDicionario)) {
+                    if (catNome === "Outros") continue;
+                    for (const chave of chaves) {
+                        if (tiposStrOriginal.includes(chave)) {
+                            serviçosDestaLinha.push({ categoria: catNome, subcategoria: "PADRÃO" });
+                        }
+                    }
+                }
+
+                // 4.2. Tratamento do campo de texto livre "Outros"
+                if (outroStrOriginal.trim() !== "") {
+                    serviçosDestaLinha.push({ categoria: "Outros", subcategoria: padronizarOutros(outroStrOriginal) });
+                }
+
+                // 4.3. Fallback de Segurança
+                if (serviçosDestaLinha.length === 0) {
+                    serviçosDestaLinha.push({ categoria: "Outros", subcategoria: "NÃO ESPECIFICADO" });
+                }
+
+                // 4.4. Achata os dados ("Flattening")
+                // Registra uma linha independente para cada serviço prestado, mantendo o ID da linha (index)
+                // para cálculos posteriores (ex: contar pessoas únicas).
+                serviçosDestaLinha.forEach(servico => {
+                    globalAtendimentos.push({
+                        idLinha: index,
+                        dataStr: dateParsed,
+                        ano: anoExtraido,
+                        mes: mesExtraido,
+                        municipio: municipioExtraido,
+                        tipoUser: normalizarStr(row[tipoUserKey]),
+                        idadeFaixa: faixaEtaria,
+                        idadeNumero: idadeExtraida,
+                        sexo: normalizarStr(row[sexoKey]),
+                        conclusivo: normalizarStr(row[conclusivoKey]),
+                        folhas: numFolhas,
+                        categoria: servico.categoria,
+                        subcategoria: servico.subcategoria
+                    });
+                });
+            });
+
+            // Popula os Selects com os dados mapeados
+            const fGlobalAno = document.getElementById('filter-ano');
+            const fGlobalMuni = document.getElementById('filter-municipio');
+            const fPerfServico = document.getElementById('perf-servico');
+
+            popularDropdown(fGlobalAno, Array.from(anosEncontrados).sort((a, b) => b - a)); 
+            popularDropdown(fGlobalMuni, Array.from(municipiosEncontrados).sort());
+            if(fPerfServico) popularDropdown(fPerfServico, Object.keys(categoriasDicionario));
+
+            // Troca da Tela de Loading para o Dashboard
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = 'block';
+            document.getElementById('global-filters-container').classList.remove('hidden');
+            document.getElementById('global-filters-container').classList.add('flex');
+            
+            const btnToggleLabels = document.getElementById('btn-toggle-labels');
+            if(btnToggleLabels) btnToggleLabels.classList.remove('hidden'); 
+            
+            // Renderiza os gráficos iniciais
+            renderizarDashboard();
+        }
+
+        // ==========================================
+        // 5. EVENT LISTENERS DOS CONTROLES (UI)
+        // ==========================================
+
+        // Botão de DataLabels (Mostrar números nos gráficos)
+        const btnToggleLabels = document.getElementById('btn-toggle-labels');
+        if(btnToggleLabels) {
+            btnToggleLabels.addEventListener('click', () => {
+                mostrarNumeros = !mostrarNumeros;
+                // Altera o estilo do botão para mostrar que está ativo
+                if (mostrarNumeros) {
+                    btnToggleLabels.classList.replace('text-blue-200', 'text-yellow-300');
+                    btnToggleLabels.classList.replace('hover:text-white', 'hover:text-yellow-100');
+                } else {
+                    btnToggleLabels.classList.replace('text-yellow-300', 'text-blue-200');
+                    btnToggleLabels.classList.replace('hover:text-yellow-100', 'hover:text-white');
+                }
+                // Atualiza todos os gráficos em tela sem animar (para ser instantâneo)
+                Object.values(chartInstances).forEach(chart => chart.update('none'));
+            });
+        }
+
+        // Detecta mudança em qualquer filtro e recalcula
+        document.querySelectorAll('.global-filter, .local-filter-op, .local-filter-perf').forEach(el => {
+            el.addEventListener('change', renderizarDashboard);
+        });
+
+        // Limpar Filtros
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            document.querySelectorAll('select').forEach(el => el.value = "ALL");
+            renderizarDashboard();
+        });
+
+        // Botão para detalhar "Outros" na Aba Operacional
+        const btnToggleCat = document.getElementById('btn-toggle-cat');
+        if(btnToggleCat) {
+            btnToggleCat.addEventListener('click', () => {
+                viewSubcategorias = !viewSubcategorias;
+                const svgIcon = viewSubcategorias ? '<svg class="w-4 h-4 ml-1 rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>' : '<svg class="w-4 h-4 ml-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+                btnToggleCat.innerHTML = viewSubcategorias ? `Voltar p/ Categorias ${svgIcon}` : `Detalhar Outros ${svgIcon}`;
+                renderizarDashboard();
+            });
+        }
+
+        // Navegação entre Abas
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active-tab', 'border-blue-800', 'text-blue-900', 'bg-blue-50', 'font-semibold');
+                el.classList.add('border-transparent', 'text-slate-500', 'font-medium');
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            activeBtn.classList.remove('border-transparent', 'text-slate-500', 'font-medium');
+            activeBtn.classList.add('active-tab', 'border-blue-800', 'text-blue-900', 'bg-blue-50', 'font-semibold');
+            
+            // Só renderiza o conteúdo da aba atual para otimizar desempenho
+            renderizarDashboard();
+        }
+
+        // ==========================================
+        // 6. RENDERIZAÇÃO DOS GRÁFICOS (CORE LOGIC)
+        // ==========================================
+
+        function renderizarDashboard() {
+            atualizarEstilosFiltros(); // Pinta os filtros de azul claro se estiverem ativos
+            
+            const fGlobalAno = document.getElementById('filter-ano');
+            const fGlobalMes = document.getElementById('filter-mes');
+            const fGlobalMuni = document.getElementById('filter-municipio');
+            
+            const vAno = fGlobalAno ? fGlobalAno.value : "ALL";
+            const vMes = fGlobalMes ? fGlobalMes.value : "ALL";
+            const vMuni = fGlobalMuni ? fGlobalMuni.value : "ALL";
+
+            // Aplica os filtros globais à base de dados
+            const baseGlobalFiltrada = globalAtendimentos.filter(d => {
+                return (vAno === "ALL" || d.ano === vAno) &&
+                       (vMes === "ALL" || d.mes === vMes) &&
+                       (vMuni === "ALL" || d.municipio === vMuni);
+            });
+
+            // Direciona o processamento para a função da aba atual
+            if (currentTab === 'geral') renderizarAbaGeral(baseGlobalFiltrada, vAno, vMes);
+            else if (currentTab === 'operacional') renderizarAbaOperacional(baseGlobalFiltrada);
+            else if (currentTab === 'perfil') renderizarAbaPerfil(baseGlobalFiltrada);
+        }
+
+        function renderizarAbaGeral(dados, vAno, vMes) {
+            // Conta registros únicos (pessoas únicas) usando o idLinha (índice da planilha original)
+            const countUnique = (arr) => new Set(arr.map(d => d.idLinha)).size;
+            
+            let folhasTotais = 0;
+            const linhasContadas = new Set();
+            dados.forEach(d => {
+                if (!linhasContadas.has(d.idLinha)) {
+                    linhasContadas.add(d.idLinha);
+                    folhasTotais += d.folhas;
+                }
+            });
+
+            const atualPessoas = countUnique(dados);
+            const atualMEIs = countUnique(dados.filter(d => d.categoria === 'Abertura de MEI' || d.categoria === 'DASN MEI'));
+
+            // Atualiza KPIs em tela
+            document.getElementById('kpi-total').innerText = atualPessoas;
+            document.getElementById('kpi-mei').innerText = atualMEIs;
+            document.getElementById('kpi-folhas').innerText = folhasTotais;
+
+            calcularEExibirCrescimento(vAno, vMes, atualPessoas, atualMEIs, folhasTotais);
+
+            // Prepara dados para o gráfico de linha de tempo
+            const contagemData = {};
+            dados.forEach(d => {
+                if(d.dataStr === "Data Indefinida") return;
+                if(!contagemData[d.dataStr]) contagemData[d.dataStr] = new Set();
+                contagemData[d.dataStr].add(d.idLinha);
+            });
+
+            const labels = Object.keys(contagemData).sort((a, b) => {
+                const [d1, m1, y1] = a.split(/[\/\-]/);
+                const [d2, m2, y2] = b.split(/[\/\-]/);
+                return new Date(y1, m1-1, d1) - new Date(y2, m2-1, d2);
+            });
+            const valores = labels.map(l => contagemData[l].size);
+
+            const temEvolucao = valores.length > 0;
+            toggleEmptyState('chartEvolucao', temEvolucao);
+            if (temEvolucao) criarGrafico('chartEvolucao', 'line', labels, valores, 'Pessoas Atendidas', '#0284c7', true);
+        }
+
+        // Calcula a variação percentual (crescimento) em relação ao mês/ano anterior
+        function calcularEExibirCrescimento(vAno, vMes, atualPessoas, atualMEIs, atualFolhas) {
+            const elPessoas = document.getElementById('kpi-total-growth');
+            const elMEIs = document.getElementById('kpi-mei-growth');
+            const elFolhas = document.getElementById('kpi-folhas-growth');
+            
+            if (vAno === "ALL") {
+                if(elPessoas) elPessoas.innerHTML = "";
+                if(elMEIs) elMEIs.innerHTML = "";
+                if(elFolhas) elFolhas.innerHTML = "";
+                return;
+            }
+
+            let filtroAnoPassado, filtroMesPassado, textoContexto;
+            // Se Mês = Todos, compara o Ano atual com o Ano passado
+            if (vMes === "ALL") {
+                filtroAnoPassado = (parseInt(vAno) - 1).toString();
+                filtroMesPassado = "ALL";
+                textoContexto = "vs. ano anterior";
+            } else {
+                // Se um Mês específico está filtrado, compara com o Mês anterior
+                let prevMes = parseInt(vMes) - 1;
+                let prevAno = parseInt(vAno);
+                if (prevMes === 0) { prevMes = 12; prevAno -= 1; }
+                filtroAnoPassado = prevAno.toString();
+                filtroMesPassado = prevMes.toString().padStart(2, '0');
+                textoContexto = "vs. mês anterior";
+            }
+
+            const fGlobalMuni = document.getElementById('filter-municipio');
+            const vMuni = fGlobalMuni ? fGlobalMuni.value : "ALL";
+
+            const basePassada = globalAtendimentos.filter(d => d.ano === filtroAnoPassado && (filtroMesPassado === "ALL" || d.mes === filtroMesPassado) && (vMuni === "ALL" || d.municipio === vMuni));
+            
+            const countUnique = (arr) => new Set(arr.map(d => d.idLinha)).size;
+            const passadoPessoas = countUnique(basePassada);
+            const passadoMEIs = countUnique(basePassada.filter(d => d.categoria === 'Abertura de MEI' || d.categoria === 'DASN MEI'));
+            
+            let passadoFolhas = 0;
+            const lPassadas = new Set();
+            basePassada.forEach(d => { if (!lPassadas.has(d.idLinha)) { lPassadas.add(d.idLinha); passadoFolhas += d.folhas; } });
+
+            const formatHTML = (atual, passado) => {
+                const spanContexto = `<span class="text-slate-400 text-[10px] ml-1 font-normal tracking-wide">${textoContexto}</span>`;
+                if (passado === 0) return `<span class="text-slate-400 font-normal ml-2">S/ Base</span>`;
+                const percent = (((atual - passado) / passado) * 100).toFixed(1);
+                if (percent > 0) return `<span class="text-emerald-500 font-bold ml-2">↑ ${percent}%</span> ${spanContexto}`;
+                if (percent < 0) return `<span class="text-red-500 font-bold ml-2">↓ ${Math.abs(percent)}%</span> ${spanContexto}`;
+                return `<span class="text-slate-500 font-bold ml-2">— 0%</span> ${spanContexto}`;
+            };
+
+            if(elPessoas) elPessoas.innerHTML = formatHTML(atualPessoas, passadoPessoas);
+            if(elMEIs) elMEIs.innerHTML = formatHTML(atualMEIs, passadoMEIs);
+            if(elFolhas) elFolhas.innerHTML = formatHTML(atualFolhas, passadoFolhas);
+        }
+
+        function renderizarAbaOperacional(dadosGlobais) {
+            const fOpConclusao = document.getElementById('op-conclusao');
+            const vConclusao = fOpConclusao ? fOpConclusao.value : "ALL";
+            const dadosLocais = dadosGlobais.filter(d => vConclusao === "ALL" || d.conclusivo.includes(vConclusao));
+
+            let labels = [], valores = [];
+
+            // Se o botão 'Detalhar Outros' NÃO foi clicado, mostra as categorias principais
+            if (!viewSubcategorias) {
+                const contagem = Object.keys(categoriasDicionario).reduce((acc, curr) => ({...acc, [curr]: 0}), {});
+                dadosLocais.forEach(d => { if(contagem[d.categoria] !== undefined) contagem[d.categoria]++; });
+                
+                labels = Object.keys(contagem);
+                valores = Object.values(contagem);
+                
+                const temCat = valores.some(v => v > 0);
+                toggleEmptyState('chartCategorias', temCat);
+                if (temCat) criarGrafico('chartCategorias', 'bar', labels, valores, 'Volume', '#2563eb', false, 'y');
+            } else {
+                // Se foi clicado, analisa e cria gráfico apenas dos itens na categoria "Outros"
+                const contagemOutros = {};
+                const apenasOutros = dadosLocais.filter(d => d.categoria === "Outros");
+                apenasOutros.forEach(d => {
+                    let sub = d.subcategoria === "." || d.subcategoria === "" ? "NÃO ESPECIFICADO" : d.subcategoria;
+                    contagemOutros[sub] = (contagemOutros[sub] || 0) + 1;
+                });
+                
+                const sortedOutros = Object.entries(contagemOutros).sort((a, b) => b[1] - a[1]);
+                const topN = 10; // Exibe os 10 principais para não quebrar o layout
+                let topSubs = sortedOutros.slice(0, topN);
+                let demaisCount = sortedOutros.slice(topN).reduce((acc, curr) => acc + curr[1], 0);
+                
+                labels = topSubs.map(item => item[0]); 
+                valores = topSubs.map(item => item[1]);
+                if (demaisCount > 0) { labels.push("DEMAIS ITENS"); valores.push(demaisCount); }
+
+                const temCat = valores.length > 0;
+                toggleEmptyState('chartCategorias', temCat);
+                if (temCat) criarGrafico('chartCategorias', 'bar', labels, valores, 'Volume', '#4f46e5', false, 'y');
+            }
+        }
+
+        function renderizarAbaPerfil(dadosGlobais) {
+            const fPerfServico = document.getElementById('perf-servico');
+            const fPerfTipo = document.getElementById('perf-tipo');
+            const fPerfConclusao = document.getElementById('perf-conclusao');
+            const fPerfGenero = document.getElementById('perf-genero');
+
+            const vServ = fPerfServico ? fPerfServico.value : "ALL";
+            const vTipo = fPerfTipo ? fPerfTipo.value : "ALL";
+            const vConclusao = fPerfConclusao ? fPerfConclusao.value : "ALL";
+            const vGenero = fPerfGenero ? fPerfGenero.value : "ALL";
+
+            // Aplica os filtros específicos de cruzamento de dados desta aba
+            const dadosLocais = dadosGlobais.filter(d => {
+                return (vServ === "ALL" || d.categoria === vServ) &&
+                       (vTipo === "ALL" || d.tipoUser.includes(vTipo)) &&
+                       (vConclusao === "ALL" || d.conclusivo.includes(vConclusao)) &&
+                       (vGenero === "ALL" || d.sexo.includes(vGenero));
+            });
+
+            // Calcula Média de Idade (considerando pessoas únicas)
+            const idadesUnicas = {};
+            dadosLocais.forEach(d => {
+                if (d.idadeNumero > 0 && !idadesUnicas[d.idLinha]) idadesUnicas[d.idLinha] = d.idadeNumero;
+            });
+            const arrayIdades = Object.values(idadesUnicas);
+            const mediaIdade = arrayIdades.length > 0 ? Math.round(arrayIdades.reduce((a, b) => a + b, 0) / arrayIdades.length) : 0;
+            document.getElementById('kpi-media-idade').innerText = mediaIdade;
+
+            // Gráfico de Gênero
+            let masc = 0, fem = 0;
+            const generoPorPessoa = {};
+            dadosLocais.forEach(d => { if (!generoPorPessoa[d.idLinha]) generoPorPessoa[d.idLinha] = d.sexo; });
+            Object.values(generoPorPessoa).forEach(sexo => {
+                if(sexo.includes('MASCULINO')) masc++;
+                else if(sexo.includes('FEMININO')) fem++;
+            });
+            
+            const temGenero = masc > 0 || fem > 0;
+            toggleEmptyState('chartGenero', temGenero);
+            if (temGenero) criarGraficoPizza('chartGenero', ['Masculino', 'Feminino'], [masc, fem], ['#2563eb', '#0ea5e9']);
+
+            // Gráfico de Faixa Etária
+            const mapIdade = {"Até 25":0, "26 a 40":0, "41 a 60":0, "Acima de 60":0, "Não Informado":0};
+            const idadePorPessoa = {}; 
+            dadosLocais.forEach(d => { if(!idadePorPessoa[d.idLinha]) idadePorPessoa[d.idLinha] = d.idadeFaixa; });
+            Object.values(idadePorPessoa).forEach(faixa => { if(mapIdade[faixa] !== undefined) mapIdade[faixa]++; });
+            
+            const temIdade = Object.values(mapIdade).some(v => v > 0);
+            toggleEmptyState('chartIdade', temIdade);
+            if (temIdade) criarGrafico('chartIdade', 'bar', Object.keys(mapIdade), Object.values(mapIdade), 'Pessoas', '#0d9488', false);
+
+            // Gráfico de Municípios
+            const muniComIds = {};
+            dadosLocais.forEach(d => {
+                if (!d.municipio) return;
+                if (!muniComIds[d.municipio]) muniComIds[d.municipio] = new Set();
+                muniComIds[d.municipio].add(d.idLinha); // Set evita contagem dupla da mesma pessoa
+            });
+            const contagemMuni = {};
+            for (const m in muniComIds) contagemMuni[m] = muniComIds[m].size;
+            
+            const sortedMuni = Object.entries(contagemMuni).sort((a, b) => b[1] - a[1]);
+            const labelsMuni = sortedMuni.map(item => item[0].toLowerCase().replace(/(^\w|\s\w)/g, m => m.toUpperCase()));
+            const valoresMuni = sortedMuni.map(item => item[1]);
+            
+            const temMuni = valoresMuni.length > 0;
+            toggleEmptyState('chartMunicipios', temMuni);
+            if (temMuni) criarGrafico('chartMunicipios', 'bar', labelsMuni, valoresMuni, 'Pessoas', '#475569', false, 'y');
+        }
+
+        // Destaca visualmente se um select está sendo usado como filtro
+        function atualizarEstilosFiltros() {
+            document.querySelectorAll('.global-filter, .local-filter-op, .local-filter-perf').forEach(el => {
+                if (el.value !== "ALL") {
+                    el.classList.add('bg-indigo-100', 'border-indigo-400', 'text-indigo-900', 'font-semibold');
+                    el.classList.remove('bg-blue-900', 'border-blue-700', 'text-white', 'bg-white', 'border-slate-300');
+                } else {
+                    el.classList.remove('bg-indigo-100', 'border-indigo-400', 'text-indigo-900', 'font-semibold');
+                    if (el.classList.contains('global-filter')) el.classList.add('bg-blue-900', 'border-blue-700', 'text-white');
+                    else el.classList.add('bg-white', 'border-slate-300');
+                }
+            });
+        }
+
+        // Esconde o canvas e mostra a div de erro (empty state) se não houver dados para plotar
+        function toggleEmptyState(canvasId, hasData) {
+            const canvas = document.getElementById(canvasId);
+            const emptyDiv = document.getElementById(`empty-${canvasId}`);
+            if (!canvas || !emptyDiv) return;
+            if (hasData) {
+                canvas.style.display = 'block';
+                emptyDiv.classList.add('hidden');
+                emptyDiv.classList.remove('flex');
+            } else {
+                canvas.style.display = 'none';
+                emptyDiv.classList.remove('hidden');
+                emptyDiv.classList.add('flex');
+                if(chartInstances[canvasId]) {
+                    chartInstances[canvasId].destroy();
+                    delete chartInstances[canvasId];
+                }
+            }
+        }
+
+        // ==========================================
+        // 7. FUNÇÕES AUXILIARES E CONSTRUTORES (UTILS)
+        // ==========================================
+
+        function criarGrafico(canvasId, type, labels, data, dataLabel, color, isLine = false, indexAxis = 'x') {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            if(chartInstances[canvasId]) chartInstances[canvasId].destroy(); // Previne Memory Leak
+            chartInstances[canvasId] = new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: dataLabel,
+                        data: data,
+                        backgroundColor: isLine ? Chart.helpers.color(color).alpha(0.1).rgbString() : color,
+                        borderColor: isLine ? color : 'transparent',
+                        borderWidth: isLine ? 2 : 0,
+                        borderRadius: isLine ? 0 : 4,
+                        fill: isLine,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    animation: false, // Desabilitado para maior performance no Apps Script
+                    indexAxis: indexAxis, // Define se a barra é horizontal (y) ou vertical (x)
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    layout: { padding: { top: 20, right: 35 } },
+                    plugins: { legend: { display: false } }, // Esconde legenda principal (usada em pizza, não aqui)
+                    scales: { 
+                        [indexAxis === 'x' ? 'y' : 'x']: { beginAtZero: true, grace: '10%', ticks: { precision: 0 } }
+                    }
+                }
+            });
+        }
+
+        function criarGraficoPizza(canvasId, labels, data, colors) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            if(chartInstances[canvasId]) chartInstances[canvasId].destroy();
+            chartInstances[canvasId] = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] },
+                options: { 
+                    animation: false, responsive: true, maintainAspectRatio: false, cutout: '60%', layout: { padding: 20 },
+                    plugins: { 
+                        legend: { position: 'bottom' },
+                        datalabels: { color: '#ffffff', anchor: 'center', align: 'center', font: { weight: 'bold', size: 14 } }
+                    } 
+                }
+            });
+        }
+
+        function categorizar(texto) {
+            const txt = normalizarStr(texto);
+            if (!txt) return "Outros";
+            for (const [cat, chaves] of Object.entries(categoriasDicionario)) {
+                if (cat === "Outros") continue;
+                for (const chave of chaves) { if (txt.includes(chave)) return cat; }
+            }
+            return "Outros";
+        }
+
+        function categorizarIdade(idadeNum, idadeRaw) {
+            if (!idadeRaw || String(idadeRaw).trim() === "") return "Não Informado";
+            if (idadeNum <= 25) return "Até 25";
+            if (idadeNum >= 26 && idadeNum <= 40) return "26 a 40";
+            if (idadeNum >= 41 && idadeNum <= 60) return "41 a 60";
+            return "Acima de 60";
+        }
+
+        function normalizarStr(str) { return str ? String(str).toUpperCase().trim() : ""; }
+        
+        function extractDateString(raw) { 
+            // Procura padrão de data (DD/MM/YYYY ou similar)
+            const m = raw.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/); 
+            return m ? m[1] : "Data Indefinida"; 
+        }
+        
+        function extrairAno(dateStr) {
+            if (dateStr === "Data Indefinida") return "Indefinido";
+            const p = dateStr.split(/[\/\-]/);
+            return p.length >= 3 ? (p[2].length === 4 ? p[2] : p[0]) : "Indefinido";
+        }
+        
+        function extrairMes(dateStr) {
+            if (dateStr === "Data Indefinida") return "Indefinido";
+            const p = dateStr.split(/[\/\-]/);
+            return p.length >= 3 ? p[1].padStart(2, '0') : "Indefinido";
+        }
+        
+        // Alimenta dinamicamente as opções `<option>` de um select
+        function popularDropdown(selectElement, arrayValores) {
+            if(!selectElement) return;
+            const currentOption = selectElement.options[0].text;
+            selectElement.innerHTML = `<option value="ALL">${currentOption}</option>`;
+            arrayValores.forEach(val => {
+                if(val && val !== "Outros") {
+                    const opt = document.createElement('option');
+                    opt.value = val;
+                    // Capitaliza apenas as primeiras letras para o visual do menu
+                    opt.textContent = val.length > 3 ? val.toLowerCase().replace(/(^\w|\s\w)/g, m => m.toUpperCase()) : val;
+                    selectElement.appendChild(opt);
+                }
+            });
+            // Adiciona a opção "Outros" sempre por último se existir
+            if(arrayValores.includes("Outros")) {
+                const opt = document.createElement('option');
+                opt.value = "Outros"; opt.textContent = "Outros";
+                selectElement.appendChild(opt);
+            }
+        }
+
+        // Tenta padronizar erros de digitação e descrições livres no campo "Outros"
+        function padronizarOutros(texto) {
+            if (!texto) return "NÃO ESPECIFICADO";
+            let t = texto.toUpperCase().trim();
+            t = t.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Remove acentos
+            
+            if (t === "." || t === "-" || t === "NADA" || /^[\d\s]+$/.test(t)) return "NÃO ESPECIFICADO";
+            
+            // Regras de substituição de aproximação
+            if (t.includes('GOV') || t.includes('OURO') || t.includes('PRATA') || t.includes('BRONZE')) return 'CONTA GOV.BR (CRIAÇÃO/NÍVEIS)';
+            if (t.includes('SENHA') || t.includes('ACESSO') || t.includes('ECAC')) return 'RECUPERAÇÃO DE SENHA / ACESSO';
+            if (t.includes('RETIFICADORA')) return 'DECLARAÇÃO RETIFICADORA (IRPF)';
+            if (t.includes('RESTITUI') || t.includes('PERDCOMP')) return 'RESTITUIÇÃO / PERDCOMP';
+            if (t.includes('MALHA') || t.includes('PENDENCIA') || t.includes('REGULARIZA')) return 'MALHA FINA / REGULARIZAÇÃO';
+            if (t.includes('IRPF') || t.includes('IMPOSTO DE RENDA') || t.includes('IR ') || t.includes('IRRF')) return 'IMPOSTO DE RENDA (DÚVIDAS/DECLARAÇÃO)';
+            if (t.includes('DARF') || t.includes('GUIA') || t.includes('SICALC')) return 'EMISSÃO DE DARF / GUIA';
+            if (t.includes('COMPENSA') || t.includes('MULTA')) return 'COMPENSAÇÃO / MULTAS';
+            if (t.includes('PARCELAMENTO') || t.includes('PARCELA')) return 'PARCELAMENTO DE DÉBITOS';
+            if (t.includes('INSS') || t.includes('PREVIDENCIA')) return 'SERVIÇOS INSS';
+            if (t.includes('MEI') || t.includes('DASN')) return 'SERVIÇOS MEI (GERAL)';
+            if (t.includes('CNPJ') || t.includes('BAIXA') || t.includes('ALTERACAO')) return 'CNPJ (BAIXA/ALTERAÇÃO)';
+            
+            // Remove preposições se o texto não for classificado acima
+            t = t.replace(/\b(NO|NA|DO|DA|DE|O|A|E|PARA|COM|SOBRE)\b/g, ' ').replace(/\s+/g, ' ').trim();
+            return t === "" ? "NÃO ESPECIFICADO" : t;
+        }
+    </script>
+</body>
+</html>
