@@ -1,13 +1,15 @@
 # 📊 Dashboard Analítico NAF (Núcleo de Apoio Contábil e Fiscal)
 
-Dashboard interativo de alta performance desenvolvido como uma *Single Page Application* (SPA) para consolidar, tratar e visualizar dados de atendimentos do NAF provenientes do Google Forms.
-
-O sistema utiliza uma **Arquitetura Serverless**, operando de forma independente como um Web App através do Google Apps Script.
-
 ## 📂 Estrutura do Projeto
 
-* **Frontend:** [index.html](index.html) — Interface em HTML5/JS com Tailwind CSS e Chart.js.
-* **Backend:** [Código.gs](Código.gs) — Motor de processamento em Google Apps Script (GAS).
+O projeto foi construído com foco em segurança e estabilidade, utilizando **zero dependências externas (CDNs)**. Todos os scripts e estilos são injetados localmente pelo servidor do Google.
+
+* **Frontend:** [`index.html`](https://www.google.com/search?q=index.html) — Interface principal em HTML5/JS com Tailwind CSS embutido.
+* **Backend:** [`Código.gs`](https://www.google.com/search?q=C%C3%B3digo.gs) — Motor de processamento, sanitização e consolidação de dados em Google Apps Script (GAS).
+* **Dependências Locais (Injetadas no HTML):**
+    * `Lib_ChartJS.html` — Biblioteca Chart.js (Renderização dos gráficos).
+    * `Lib_DataLabels.html` — Plugin ChartDataLabels (Exibição dos números nas barras/pizzas).
+
 
 * **Ferramentas de Dados:**
 * [gerador-csv.py](gerador-csv.py) — Script Python para geração de dados sintéticos para testes.
@@ -51,7 +53,9 @@ Para garantir a manutenção de longo prazo e a escalabilidade do projeto, consu
 * **[Conexão de Dados e IDs](wiki/dados.md)** — Tutorial de como encontrar IDs e conectar novas planilhas.
 * **[Consolidação de Múltiplas Abas](wiki/multiplas-abas.md)** — Como somar dados de diferentes páginas de um mesmo arquivo.
 * **[Guia de Atualização (Deploy)](wiki/atualizaçao.md)** — Como publicar novas versões do código sem quebrar o link público.
-* **[Guia de Atualização (Deploy)](wiki/gerador-python.md)** — Tutorial de como usar o `gerador-csv.py`.
+* **[Guia Gerador Python](wiki/gerador-python.md)** — Tutorial de como usar o `gerador-csv.py`.
+* **[Firewall](wiki/firewall.md)** — Bloqueio de palavras chaves no Backend.
+* **[Regras de negócio](wiki/regras-de-negocio.md)** — Este documento compila as "travas lógicas" do código, como a conversão de géneros, faixas etárias, aglomeração do campo "Outros" e o cálculo dos KPIs.
 
 
 ## 🔒 Segurança e Privacidade (Privacy by Design)

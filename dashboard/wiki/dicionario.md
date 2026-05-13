@@ -1,4 +1,4 @@
-# 📖 Wiki: Gestão do Dicionário de Categorias
+# 📖 Gestão do Dicionário de Categorias
 
 O **Dicionário de Categorias** é o "cérebro" da aba Operacional do Dashboard. Ele é responsável por transformar as respostas longas, técnicas e muitas vezes combinadas do Google Forms em rótulos (*labels*) curtos e fáceis de ler nos gráficos.
 

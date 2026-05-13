@@ -1,3 +1,19 @@
+/*
+ * Dashboard NAF
+ * Copyright (C) 2026  elrunix12
+ *
+ * Este programa é um software livre: você pode redistribuí-lo e/ou modificá-lo
+ * sob os termos da GNU Affero General Public License, versão 3 (AGPLv3),
+ * conforme publicada pela Free Software Foundation.
+ *
+ * Este programa é distribuído na esperança de que seja útil,
+ * mas SEM NENHUMA GARANTIA; sem mesmo a garantia implícita de
+ * COMERCIALIZAÇÃO ou ADEQUAÇÃO A UM DETERMINADO PROPÓSITO.
+ *
+ * Veja o arquivo LICENSE para mais detalhes.
+ */
+
+
 /**
  * @fileoverview Backend do Dashboard NAF (Google Apps Script)
  * Consolida múltiplas fontes de dados de forma inteligente e segura.
@@ -62,24 +78,41 @@ function obterDadosPlanilha() {
         let registro = {};
         
         cabecalhoLocal.forEach((nomeColuna, i) => {
-          const nomeLimpo = nomeColuna.toString().trim();
+          // 1. Prevenção: Ignora se a coluna for nula ou vazia
+          if (!nomeColuna) return;
+
+          const nomeOriginal = nomeColuna.toString();
           
-          // FIREWALL: Não envia CPF ou Nome do Contribuinte para o navegador
-          if (nomeLimpo === "NOME DO CONTRIBUINTE" || nomeLimpo === "CPF") return;
+          // 2. Normalização para o FIREWALL
+          const nomeTratado = nomeOriginal.toLowerCase()
+            .trim()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+
+          // 3. FIREWALL COM REGEX (Mais seguro contra falsos positivos)
+          // O \b garante que ele procura a palavra exata (ex: " rg "), não pedaços de palavras (ex: "carga")
+          const regexProibido = /\b(cpf|cnpj|contribuinte|telefone|celular|email|e-mail|rg|identidade|nascimento|endereco|senha)\b/;
+
+          // Testa se o nome da coluna bate com alguma das palavras proibidas
+          if (regexProibido.test(nomeTratado)) {
+            return; // Bloqueia e avança para a próxima coluna
+          }
 
           let valor = linha[i];
 
-          // Formatação de Datas (Evita problemas de fuso horário no JavaScript)
+          // 4. Formatação de Dados
           if (valor instanceof Date) {
-            registro[nomeLimpo] = valor.toLocaleDateString('pt-BR');
+            registro[nomeOriginal] = valor.toLocaleDateString('pt-BR');
           } else {
-            registro[nomeLimpo] = valor;
+            registro[nomeOriginal] = valor;
           }
         });
 
-        // Adiciona um ID único para cada linha (útil para o frontend)
-        registro["rowId"] = registrosConsolidados.length + 2;
-        registrosConsolidados.push(registro);
+        // Só adiciona se o objeto não estiver vazio (garante que temos dados)
+        if (Object.keys(registro).length > 0) {
+          registro["rowId"] = registrosConsolidados.length + 2;
+          registrosConsolidados.push(registro);
+        }
       });
 
     } catch (e) {

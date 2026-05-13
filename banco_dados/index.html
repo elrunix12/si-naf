@@ -177,7 +177,7 @@
                 const servicoKey = cols.find(k => limpar(k).includes('tipo de atendimento') && !limpar(k).includes('usuario'));
                 const conclusaoKey = cols.find(k => limpar(k).includes('conclusivo'));
                 const idadeKey = cols.find(k => limpar(k) === 'idade');
-                const sexoKey = cols.find(k => limpar(k).includes('sexo'));
+                const sexoKey = colunas.find(k => limparTexto(k).includes('sexo') || limparTexto(k).includes('genero'));
                 const municipioKey = cols.find(k => limpar(k).includes('municipio'));
                 const tipoUserKey = cols.find(k => limpar(k).includes('tipo de usuario'));
 

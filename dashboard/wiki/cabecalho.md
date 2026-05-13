@@ -12,11 +12,10 @@ O mapeamento ocorre na função `processarDadosBrutos(rawData)`, logo no início
 const folhasKey = colunas.find(k => limparTexto(k).includes('folhas'));
 const tipoKey = colunas.find(k => limparTexto(k).includes('tipo de atendimento') && !limparTexto(k).includes('usuario'));
 const outroKey = colunas.find(k => limparTexto(k).includes('respondeu outro'));
-const sexoKey = colunas.find(k => limparTexto(k).includes('sexo'));
+const sexoKey = colunas.find(k => limparTexto(k).includes('sexo') || limparTexto(k).includes('genero')
 // ...
 
 ```
-
 
 
 ## 2. A Função `limparTexto()` (Anti-Erros)
@@ -30,25 +29,29 @@ A função `limparTexto()` pega o cabeçalho e:
 Portanto, quando você for alterar as palavras-chave no código, **escreva sempre em letras minúsculas e sem acentos** dentro dos parênteses do `.includes('...')`.
 
 
+## 3. Tabela de Palavras-Chave (Mapeamento do Forms)
 
-## 3. Tabela de Palavras-Chave Obrigatórias
+Esta é a lista de termos que o sistema procura automaticamente no cabeçalho da planilha (gerado pelo Google Forms). O sistema ignora acentos e letras maiúsculas/minúsculas.
 
-Esta é a lista de raízes de texto que o sistema procura atualmente. Se a pergunta no Google Forms não contiver esse texto exato, a coluna será ignorada e o dado não aparecerá no painel.
+**Atenção:** Se a pergunta no Google Forms não contiver *pelo menos uma* dessas palavras-chave exatas, a coluna será ignorada e o dado não aparecerá no Dashboard.
 
-| Variável no Código | Texto Procurado (`.includes`) | Exemplo de Pergunta Aceita no Forms |
-|  |  |  |
-| `folhasKey` | `folhas` | *Se houver, quantas **folhas** foram impressas?* |
-| `outroKey` | `respondeu outro` | *Se **respondeu outro**, especifique aqui:* |
-| `sexoKey` | `sexo` | *Qual o seu **sexo** / gênero?* |
-| `conclusivoKey` | `conclusivo` | *O atendimento prestado foi **conclusivo**?* |
-| `municipioKey` | `municipio` | *Qual o **município** de residência?* |
-| `tipoUserKey` | `tipo de usuario` | ***Tipo de usuário** dos serviços (PF ou PJ)?* |
+| Variável no Sistema | Palavra-chave Procurada | Para que serve no Dashboard? | Exemplo de Pergunta Aceita no Forms |
+| --- | --- | --- | --- |
+| `keyAtendimento` | `data de atendimento` | Monta o gráfico de Evolução Histórica. | *Qual a **data de atendimento**?* |
+| `keyCarimbo` | `carimbo` | Plano B caso a data acima falhe (usa a data do sistema). | ***Carimbo** de data/hora* |
+| `tipoKey` | `tipo de atendimento` | Classifica o serviço no Gráfico Operacional. | *Qual o **tipo de atendimento** prestado?* |
+| `outroKey` | `respondeu outro` | Pega textos livres para detalhar outros serviços. | *Se **respondeu outro**, especifique:* |
+| `sexoKey` | `sexo` ou `genero` | Monta o gráfico de pizza de perfil do contribuinte. | *Qual o seu **sexo** / **gênero**?* |
+| `idadeKey` | `idade` | Calcula a média e as faixas etárias. | *Qual a sua **idade**?* |
+| `conclusivoKey` | `conclusivo` | Filtra a taxa de sucesso dos atendimentos. | *O atendimento prestado foi **conclusivo**?* |
+| `folhasKey` | `folhas` | Soma o indicador geral de volume de impressões. | *Se houver, quantas **folhas** foram impressas?* |
+| `municipioKey` | `municipio` | Monta o gráfico de alcance geográfico. | *Qual o **município** de residência?* |
+| `tipoUserKey` | `tipo de usuario` | Permite filtrar entre Pessoa Física (PF) e Jurídica (PJ). | ***Tipo de usuário** dos serviços (PF ou PJ)?* |
+
 
 ### Regras de Exceção:
 
 * **Tipo de Atendimento:** O sistema procura por `tipo de atendimento`, mas exclui colunas que também tenham a palavra `usuario`. Isso evita que ele confunda a coluna de "Tipo de usuário" com a coluna de serviços prestados.
-* **Idade:** O código exige a correspondência exata para evitar confusões. A pergunta no Forms deve se chamar exatamente `IDADE` (o sistema limpa para `idade`). Se a pergunta for "Qual a sua idade?", o script não vai encontrar.
-
 
 
 ## 4. Como alterar uma palavra-chave?
@@ -68,7 +71,6 @@ Se a unidade do NAF decidir mudar a redação da pergunta no formulário, você 
 const folhasKey = colunas.find(k => limparTexto(k).includes('copias'));
 
 ```
-
 
 
 ## 5. Hierarquia Temporal (A dupla verificação de Data)
