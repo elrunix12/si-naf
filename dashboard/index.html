@@ -140,7 +140,11 @@
                 <select id="perf-servico" class="bg-white border border-slate-300 text-sm rounded focus:ring-blue-500 p-1.5 local-filter-perf cursor-pointer"><option value="ALL">Serviço: Todos</option></select>
                 <select id="perf-tipo" class="bg-white border border-slate-300 text-sm rounded focus:ring-blue-500 p-1.5 local-filter-perf cursor-pointer"><option value="ALL">Público: Todos</option><option value="PESSOA FÍSICA">Pessoa Física</option><option value="PESSOA JURÍDICA">Pessoa Jurídica</option></select>
                 <select id="perf-conclusao" class="bg-white border border-slate-300 text-sm rounded focus:ring-blue-500 p-1.5 local-filter-perf cursor-pointer"><option value="ALL">Status: Todos</option><option value="SIM">Conclusivo</option><option value="NÃO">Não Conclusivo</option></select>
-                <select id="perf-genero" class="bg-white border border-slate-300 text-sm rounded focus:ring-blue-500 p-1.5 local-filter-perf cursor-pointer"><option value="ALL">Gênero: Todos</option><option value="MASCULINO">Masculino</option><option value="FEMININO">Feminino</option></select>
+                <select id="perf-genero" class="bg-white border border-slate-300 text-sm rounded focus:ring-blue-500 p-1.5 local-filter-perf cursor-pointer">
+                <option value="ALL">Gênero: Todos</option>
+                <option value="MASCULINO">Masculino</option>
+                <option value="FEMININO">Feminino</option>
+                <option value="NÃO INFORMADO">Não Informado</option> </select>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -343,6 +347,20 @@
 
                 const municipioExtraido = normalizarStr(row[municipioKey]);
                 if (municipioExtraido) municipiosEncontrados.add(municipioExtraido);
+
+                // Tratamento Inteligente de Gênero) ---
+                const textoSexo = limparTexto(row[sexoKey]); 
+                let sexoFinal = "NÃO INFORMADO";
+
+                // Se tiver a palavra 'masculino' (independente de acento/maiúscula), é Masculino
+                if (textoSexo.includes("masculino")) {
+                    sexoFinal = "MASCULINO";
+                } 
+                // Se tiver 'feminino', é Feminino
+                else if (textoSexo.includes("feminino")) {
+                    sexoFinal = "FEMININO";
+                }
+                // Qualquer outra coisa (vazio, "N/A", "Não sei", etc) continua como "NÃO INFORMADO"
                 
                 // 4. Volume de Folhas
                 const folhasStr = String(row[folhasKey] || "0");
@@ -381,7 +399,7 @@
                         tipoUser: normalizarStr(row[tipoUserKey]),
                         idadeFaixa: faixaEtaria,
                         idadeNumero: idadeExtraida,
-                        sexo: normalizarStr(row[sexoKey]),
+                        sexo: sexoFinal,
                         conclusivo: normalizarStr(row[conclusivoKey]),
                         folhas: numFolhas,
                         categoria: servico.categoria,
@@ -611,12 +629,17 @@
             let labels = [], valores = [];
 
             // Se o botão 'Detalhar Outros' NÃO foi clicado, mostra as categorias principais
+            // Se o botão 'Detalhar Outros' NÃO foi clicado, mostra as categorias principais
             if (!viewSubcategorias) {
                 const contagem = Object.keys(categoriasDicionario).reduce((acc, curr) => ({...acc, [curr]: 0}), {});
                 dadosLocais.forEach(d => { if(contagem[d.categoria] !== undefined) contagem[d.categoria]++; });
                 
-                labels = Object.keys(contagem);
-                valores = Object.values(contagem);
+                // --- NOVA PARTE: Transforma em array e ordena do maior para o menor ---
+                const sortedCategorias = Object.entries(contagem).sort((a, b) => b[1] - a[1]);
+                
+                labels = sortedCategorias.map(item => item[0]);
+                valores = sortedCategorias.map(item => item[1]);
+                // -----------------------------------------------------------------------
                 
                 const temCat = valores.some(v => v > 0);
                 toggleEmptyState('chartCategorias', temCat);
@@ -631,13 +654,21 @@
                 });
                 
                 const sortedOutros = Object.entries(contagemOutros).sort((a, b) => b[1] - a[1]);
-                const topN = 10; // Exibe os 10 principais para não quebrar o layout
+                const topN = 20; // Separa os 10 principais
                 let topSubs = sortedOutros.slice(0, topN);
                 let demaisCount = sortedOutros.slice(topN).reduce((acc, curr) => acc + curr[1], 0);
                 
-                labels = topSubs.map(item => item[0]); 
-                valores = topSubs.map(item => item[1]);
-                if (demaisCount > 0) { labels.push("DEMAIS ITENS"); valores.push(demaisCount); }
+                // Monta a lista final com o Top 10 + Demais Itens (se houver)
+                let listaFinal = [...topSubs];
+                if (demaisCount > 0) { 
+                    listaFinal.push(["DEMAIS ITENS", demaisCount]); 
+                }
+
+                // NOVA PARTE: Reordena a lista final para que o "DEMAIS ITENS" caia na posição correta da escadinha
+                listaFinal.sort((a, b) => b[1] - a[1]);
+                
+                labels = listaFinal.map(item => item[0]); 
+                valores = listaFinal.map(item => item[1]);
 
                 const temCat = valores.length > 0;
                 toggleEmptyState('chartCategorias', temCat);
@@ -659,9 +690,9 @@
             // Aplica os filtros específicos de cruzamento de dados desta aba
             const dadosLocais = dadosGlobais.filter(d => {
                 return (vServ === "ALL" || d.categoria === vServ) &&
-                       (vTipo === "ALL" || d.tipoUser.includes(vTipo)) &&
-                       (vConclusao === "ALL" || d.conclusivo.includes(vConclusao)) &&
-                       (vGenero === "ALL" || d.sexo.includes(vGenero));
+                    (vTipo === "ALL" || d.tipoUser.includes(vTipo)) &&
+                    (vConclusao === "ALL" || d.conclusivo.includes(vConclusao)) &&
+                    (vGenero === "ALL" || d.sexo === vGenero); 
             });
 
             // Calcula Média de Idade (considerando pessoas únicas)
@@ -674,17 +705,31 @@
             document.getElementById('kpi-media-idade').innerText = mediaIdade;
 
             // Gráfico de Gênero
-            let masc = 0, fem = 0;
+            let masc = 0, fem = 0, naoInfo = 0;
             const generoPorPessoa = {};
-            dadosLocais.forEach(d => { if (!generoPorPessoa[d.idLinha]) generoPorPessoa[d.idLinha] = d.sexo; });
-            Object.values(generoPorPessoa).forEach(sexo => {
-                if(sexo.includes('MASCULINO')) masc++;
-                else if(sexo.includes('FEMININO')) fem++;
+
+            // Como já padronizamos lá em cima, é só ler direto:
+            dadosLocais.forEach(d => { 
+                if (!generoPorPessoa[d.idLinha]) generoPorPessoa[d.idLinha] = d.sexo; 
             });
-            
-            const temGenero = masc > 0 || fem > 0;
+
+            Object.values(generoPorPessoa).forEach(sexo => {
+                if(sexo === 'MASCULINO') masc++;
+                else if(sexo === 'FEMININO') fem++;
+                else naoInfo++;
+            });
+
+            const temGenero = masc > 0 || fem > 0 || naoInfo > 0;
             toggleEmptyState('chartGenero', temGenero);
-            if (temGenero) criarGraficoPizza('chartGenero', ['Masculino', 'Feminino'], [masc, fem], ['#2563eb', '#0ea5e9']);
+
+            if (temGenero) {
+                criarGraficoPizza(
+                    'chartGenero', 
+                    ['Masculino', 'Feminino', 'Não Informado'], 
+                    [masc, fem, naoInfo], 
+                    ['#2563eb', '#0ea5e9', '#cbd5e1']
+                );
+            }
 
             // Gráfico de Faixa Etária
             const mapIdade = {"Até 25":0, "26 a 40":0, "41 a 60":0, "Acima de 60":0, "Não Informado":0};
