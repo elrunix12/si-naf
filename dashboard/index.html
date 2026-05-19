@@ -328,16 +328,26 @@ Veja o arquivo LICENSE para mais detalhes.
                 const keyCarimbo = colunas.find(k => limparTexto(k).includes('carimbo'));
 
                 let rawDate = "";
-                
-                if (keyAtendimento && String(row[keyAtendimento] || "").trim() !== "") {
-                    rawDate = String(row[keyAtendimento]).trim(); // Tenta a data real primeiro
-                } else if (keyCarimbo) {
-                    rawDate = String(row[keyCarimbo]).trim(); // Usa o carimbo como plano B
+                const dataAtendimentoStr = keyAtendimento ? String(row[keyAtendimento] || "").trim() : "";
+                const carimboStr = keyCarimbo ? String(row[keyCarimbo] || "").trim() : "";
+
+                if (dataAtendimentoStr !== "") {
+                    // Extrai o ano da Data de Atendimento para fazer a checagem
+                    const anoInformado = parseInt(extrairAno(extractDateString(dataAtendimentoStr)));
+                    
+                    // TRAVA: Se o ano for reconhecido e for menor que 2021, ignora e usa o Carimbo
+                    if (!isNaN(anoInformado) && anoInformado < 2021) {
+                        rawDate = carimboStr;
+                    } else {
+                        rawDate = dataAtendimentoStr; // Data válida e >= 2021
+                    }
+                } else if (carimboStr !== "") {
+                    rawDate = carimboStr; // Plano B: se atendimento estiver vazio, usa carimbo
                 }
-                
+
                 // --- TRAVA DE DATA VAZIA E CABEÇALHOS ---
                 // Se a data estiver vazia, não tiver números ou for o cabeçalho, pula a linha
-                if (!rawDate || !/\d/.test(rawDate) || rawDate.toLowerCase().includes('carimbo')) return; 
+                if (!rawDate || !/\d/.test(rawDate) || rawDate.toLowerCase().includes('carimbo')) return;
 
                 // Localiza as demais chaves com a mesma lógica de proteção
                 const folhasKey = colunas.find(k => limparTexto(k).includes('folhas'));

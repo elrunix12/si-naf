@@ -48,6 +48,7 @@ No portal GAS, configure as IDs das suas planilhas em "Configurações do Projet
 
 Para garantir a manutenção de longo prazo e a escalabilidade do projeto, consulte os manuais específicos abaixo:
 
+* **[Manual do Usuário](wiki/guia-usuário.md)** — Guia do Dashboard para usuários finais.
 * **[Gestão do Dicionário de Categorias](wiki/dicionario.md)** — Como alterar ou adicionar novos tipos de serviços no Dashboard.
 * **[Mapeamento de Cabeçalhos](wiki/cabecalho.md)** — Como o script identifica as colunas da planilha através de palavras-chave.
 * **[Conexão de Dados e IDs](wiki/dados.md)** — Tutorial de como encontrar IDs e conectar novas planilhas.
