@@ -83,3 +83,13 @@ if (dataAtendimentoStr !== "") {
 // --- TRAVA DE DATA VAZIA E CABEÇALHOS ---
 // Se a data estiver vazia, não tiver números ou for o cabeçalho, pula a linha
 if (!rawDate || !/\d/.test(rawDate) || rawDate.toLowerCase().includes('carimbo')) return;
+```
+
+## 6. Cálculo da Taxa de Retorno (Fidelização)
+
+A Taxa de Retorno, visível na aba "Geral", mede quantos contribuintes usaram o NAF mais de uma vez em dias distintos.
+
+* **Lógica Base:** Como o sistema é protegido pela LGPD, o frontend não recebe CPFs, apenas o `usuarioHash`.
+* **Cálculo:** O código agrupa todos os atendimentos feitos pelo mesmo `usuarioHash`. Em seguida, ele analisa a `Data de Atendimento`. Se o mesmo Hash possuir registros em duas ou mais datas diferentes, ele é contabilizado como "Pessoa Recorrente".
+* **Fórmula:** `(Total de Pessoas Recorrentes / Total de Hashes Únicos) * 100`.
+* **Atenção:** Se uma pessoa fizer três serviços *no mesmo dia*, ela **não** será considerada recorrente, apenas gerará mais volume operacional.

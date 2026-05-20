@@ -3,14 +3,46 @@
 
 ## 🛡️ Visão Geral
 
-O "Firewall de Dados" é um mecanismo de segurança implementado no backend (`Código.gs`) do Dashboard NAF. Seu objetivo exclusivo é impedir que Informações de Identificação Pessoal (PII) e dados sensíveis dos contribuintes sejam trafegados do servidor do Google para o navegador do usuário.
+O "Firewall de Dados" é um mecanismo de segurança implementado no backend (`Código.gs`). Seu objetivo é impedir que Informações de Identificação Pessoal (PII) e dados sensíveis trafeguem do servidor do Google para o navegador do usuário.
 
-Como o sistema lê dados brutos de planilhas de atendimento, ele atua como um filtro intermediário, garantindo que colunas contendo CPFs, nomes, telefones ou e-mails sejam sumariamente ignoradas durante a consolidação dos dados.
+A única exceção é o CPF: em vez de ser bloqueado sumariamente, ele é interceptado e transformado em um código anônimo irreversível (Hash SHA-256 com Salt). Isso permite que o Dashboard contabilize se um contribuinte retornou (fidelização), sem nunca saber quem ele é.
 
+## ⚙️ Como Funciona (O Fluxo Lógico via Index Mapping)
 
-## ⚙️ Como Funciona (O Fluxo Lógico)
+Para garantir máxima velocidade, o firewall não analisa célula por célula. Ele lê o cabeçalho uma única vez e cria um "mapa de colunas permitidas":
 
-O firewall opera em três etapas sequenciais para cada coluna encontrada no cabeçalho da planilha:
+1. **Higienização do Cabeçalho:** Converte os títulos para minúsculas e remove os acentos (ex: "E-mail" vira "e-mail").
+2. **Interceptação do CPF:** Se a coluna for identificada como CPF, o sistema anota a posição dela para aplicar a criptografia posteriormente.
+3. **Validação por Regex:** O texto normalizado das demais colunas é testado contra uma lista de palavras proibidas utilizando limites de palavra (`\b`), o que evita falsos positivos (ex: barra "rg" isolado, mas permite "carga"). As colunas aprovadas entram para a lista de `colunasPermitidas`.
+
+## 💻 O Código-Fonte
+
+Este é o bloco lógico da nova arquitetura de alta performance, executado antes de ler os dados:
+
+```javascript
+// O Regex é instanciado FORA do loop para economizar memória (Alta Performance)
+const regexProibido = /\b(cpf|cnpj|contribuinte|telefone|celular|email|e-mail|rg|identidade|nascimento|endereco|senha)\b/;
+
+let indiceCpf = -1;
+const colunasPermitidas = [];
+
+cabecalhoLocal.forEach((nomeColuna, i) => {
+  if (!nomeColuna) return;
+  
+  const nomeTratado = nomeColuna.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  // Intercepta o CPF
+  if (nomeTratado === 'cpf' || nomeTratado.includes('cpf')) {
+    indiceCpf = i;
+    return;
+  }
+
+  // Se passar no firewall, entra no mapa de colunas permitidas
+  if (!regexProibido.test(nomeTratado)) {
+    colunasPermitidas.push({ nomeOriginal: nomeColuna.toString(), index: i });
+  }
+});
+```
 
 ### 1. Prevenção contra Nulos (Null Check)
 
@@ -29,33 +61,6 @@ Para evitar que o filtro seja burlado por erros de digitação ou formatações 
 O texto normalizado é testado contra uma lista de palavras proibidas utilizando Regex. O uso de **limites de palavra (`\b`)** garante precisão absoluta, evitando **falsos positivos**.
 
 * *Exemplo prático:* A regra barra a palavra isolada `rg`. Se não houvesse o limite de palavra, uma coluna perfeitamente segura chamada `carga horária` ou `margem` seria bloqueada acidentalmente, pois contém as letras "r" e "g" juntas.
-
-
-## 💻 O Código-Fonte
-
-Este é o bloco lógico localizado dentro da função `obterDadosPlanilha()`, rodando no loop de mapeamento de cabeçalhos:
-
-```javascript
-// 1. Prevenção: Ignora se a coluna for nula ou vazia
-if (!nomeColuna) return;
-
-const nomeOriginal = nomeColuna.toString();
-
-// 2. Normalização para o FIREWALL
-const nomeTratado = nomeOriginal.toLowerCase()
-  .trim()
-  .normalize("NFD")
-  .replace(/[\u0300-\u036f]/g, "");
-
-// 3. FIREWALL COM REGEX (Proteção contra falsos positivos)
-const regexProibido = /\b(cpf|cnpj|contribuinte|telefone|celular|email|e-mail|rg|identidade|nascimento|endereco|senha)\b/;
-
-// Se o nome da coluna contiver alguma das palavras proibidas, bloqueia.
-if (regexProibido.test(nomeTratado)) {
-  return; 
-}
-
-```
 
 
 

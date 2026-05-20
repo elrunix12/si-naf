@@ -32,11 +32,12 @@ Existem filtros cinzas dentro das abas "Operacional" e "Perfil". Eles servem par
 
 ## 3. Entendendo os Indicadores (KPIs)
 
-Na aba **Geral**, você encontrará três cartões principais com setas de crescimento:
+Na aba **Geral**, você encontrará quatro cartões principais:
 
-* **Pessoas Atendidas:** Volume total de registros únicos.
-* **Contribuintes MEI:** Quantidade de atendimentos voltados exclusivamente para Microempreendedores Individuais.
-* **Folhas Impressas:** Total de impressões geradas.
+* **Pessoas Atendidas:** Volume total de registros únicos na linha do tempo.
+* **Público Majoritário:** O perfil de usuário que mais buscou os serviços.
+* **Taxa de Retorno:** A porcentagem de contribuintes (CPFs únicos e anonimizados) que voltaram ao NAF em dias diferentes (fidelização).
+* **Folhas Impressas:** Total de impressões geradas para o contribuinte.
 
 **📊 A lógica das setas:**
 

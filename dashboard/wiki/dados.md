@@ -44,13 +44,13 @@ Por padrão, o sistema é otimizado para formulários do Google, que costumam ge
 
 
 
-## 4. Segurança e LGPD Automática
+## 4. Segurança
 
 Uma das maiores vantagens desta arquitetura é que o **Firewall de Privacidade** é global. Isso significa que:
 
-1. Assim que você conecta um novo ID de planilha, o backend automaticamente passa a monitorar essa nova fonte.
-2. Se essa nova planilha contiver colunas nomeadas como `CPF` ou `NOME DO CONTRIBUINTE`, o sistema irá bloqueá-las antes de enviar os dados para o dashboard.
-3. Não é necessário configurar a segurança individualmente para cada planilha conectada; o script "limpa" os dados de todas as fontes antes da consolidação final.
+1. Assim que você conecta um novo ID de planilha, o backend automaticamente passa a monitorar essa fonte.
+2. Se a planilha contiver colunas contendo Nomes, Telefones ou E-mails, o sistema as bloqueará sumariamente.
+3. **Criptografia de CPF:** Se a planilha possuir uma coluna de CPF, o sistema repara zeros à esquerda perdidos e aplica um algoritmo Hash irreversível (SHA-256) somado a um "Salt" (Chave de Segurança das propriedades do script). O Dashboard receberá apenas um código alfanumérico (ex: `e3b0c442...`), permitindo gerar estatísticas de fidelização.
 
 
 
