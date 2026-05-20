@@ -94,12 +94,12 @@ Veja o arquivo LICENSE para mais detalhes.
                     <p class="text-xs text-slate-400 mt-2">Registros únicos na linha do tempo</p>
                 </div>
                 <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm border-l-4 border-l-sky-500 relative">
-                    <h3 class="text-slate-500 text-sm font-semibold mb-1">Pessoas Contribuintes MEI</h3>
-                    <div class="flex items-end gap-3">
-                        <p class="text-3xl font-bold text-slate-800" id="kpi-mei">0</p>
-                        <span id="kpi-mei-growth" class="text-xs font-medium mb-1"></span>
+                    <h3 class="text-slate-500 text-sm font-semibold mb-1">Público Majoritário</h3>
+                    <div class="flex flex-col items-start">
+                        <p class="text-xl font-bold text-slate-800 truncate w-full" id="kpi-perfil-dominante">Buscando...</p>
+                        <span id="kpi-perfil-dominante-porcentagem" class="text-xs font-medium text-slate-400 mt-1"></span>
                     </div>
-                    <p class="text-xs text-slate-400 mt-2">Demandaram Abertura ou DASN</p>
+                    <p class="text-xs text-slate-400 mt-2">Perfil mais atendido no período</p>
                 </div>
                 <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm border-l-4 border-l-indigo-600 relative">
                     <h3 class="text-slate-500 text-sm font-semibold mb-1">Folhas Impressas</h3>
@@ -153,7 +153,9 @@ Veja o arquivo LICENSE para mais detalhes.
             <div class="bg-slate-100 p-3 rounded-lg mb-6 flex flex-wrap gap-4 items-center">
                 <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Cruzar Dados:</span>
                 <select id="perf-servico" class="bg-white border border-slate-300 text-sm rounded focus:ring-blue-500 p-1.5 local-filter-perf cursor-pointer"><option value="ALL">Serviço: Todos</option></select>
-                <select id="perf-tipo" class="bg-white border border-slate-300 text-sm rounded focus:ring-blue-500 p-1.5 local-filter-perf cursor-pointer"><option value="ALL">Público: Todos</option><option value="PESSOA FÍSICA">Pessoa Física</option><option value="PESSOA JURÍDICA">Pessoa Jurídica</option></select>
+                <select id="perf-tipo" class="bg-white border border-slate-300 text-sm rounded focus:ring-blue-500 p-1.5 local-filter-perf cursor-pointer">
+                    <option value="ALL">Público: Todos</option>
+                </select>
                 <select id="perf-conclusao" class="bg-white border border-slate-300 text-sm rounded focus:ring-blue-500 p-1.5 local-filter-perf cursor-pointer"><option value="ALL">Status: Todos</option><option value="SIM">Conclusivo</option><option value="NÃO">Não Conclusivo</option></select>
                 <select id="perf-genero" class="bg-white border border-slate-300 text-sm rounded focus:ring-blue-500 p-1.5 local-filter-perf cursor-pointer">
                 <option value="ALL">Gênero: Todos</option>
@@ -187,12 +189,22 @@ Veja o arquivo LICENSE para mais detalhes.
                         <div id="empty-chartIdade" class="hidden absolute inset-0 flex-col items-center justify-center bg-slate-50/80 rounded-lg border border-dashed border-slate-200 z-10"><span class="text-xs text-slate-400 font-medium">Nenhuma faixa etária mapeada</span></div>
                     </div>
                 </div>
-                
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 lg:col-span-3">
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 lg:col-span-1">
                     <h3 class="text-md font-bold text-slate-700 mb-4">Alcance Geográfico (Municípios)</h3>
                     <div class="relative h-[350px] flex flex-col justify-center">
                         <canvas id="chartMunicipios"></canvas>
                         <div id="empty-chartMunicipios" class="hidden absolute inset-0 flex-col items-center justify-center bg-slate-50/80 rounded-lg border border-dashed border-slate-200 z-10"><span class="text-sm text-slate-500 font-medium">Nenhum alcance geográfico encontrado</span></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 lg:col-span-2">
+                    <h3 class="text-md font-bold text-slate-700 mb-4">Perfil dos Usuários Atendidos</h3>
+                    <div class="relative w-full flex flex-col justify-center h-[350px]">
+                        <canvas id="chartTipoUsuario"></canvas>
+                        <div id="empty-chartTipoUsuario" class="hidden absolute inset-0 flex-col items-center justify-center bg-slate-50/80 rounded-lg border border-dashed border-slate-200 z-10">
+                            <span class="text-sm text-slate-500 font-medium">Nenhum perfil mapeado para este filtro</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -319,6 +331,7 @@ Veja o arquivo LICENSE para mais detalhes.
             globalAtendimentos = [];
             let anosEncontrados = new Set(); 
             let municipiosEncontrados = new Set();
+            let tiposUserEncontrados = new Set();
 
             rawData.forEach((row, index) => {
                 const colunas = Object.keys(row);
@@ -346,15 +359,17 @@ Veja o arquivo LICENSE para mais detalhes.
                 }
 
                 // --- TRAVA DE DATA VAZIA E CABEÇALHOS ---
-                // Se a data estiver vazia, não tiver números ou for o cabeçalho, pula a linha
-                if (!rawDate || !/\d/.test(rawDate) || rawDate.toLowerCase().includes('carimbo')) return;
+                // Usa a função auxiliar para checar se existe um formato de data real (DD/MM/YYYY)
+                const dateParsed = extractDateString(rawDate);
+                
+                // Se não for uma data válida ou se for a linha de cabeçalho, ignora a linha completamente
+                if (dateParsed === "Data Indefinida" || rawDate.toLowerCase().includes('carimbo')) return;
 
                 // Localiza as demais chaves com a mesma lógica de proteção
                 const folhasKey = colunas.find(k => limparTexto(k).includes('folhas'));
                 const tipoKey = colunas.find(k => limparTexto(k).includes('tipo de atendimento') && !limparTexto(k).includes('usuario'));
                 const outroKey = colunas.find(k => limparTexto(k).includes('respondeu outro'));
-                const sexoKey = colunas.find(k => limparTexto(k).includes('sexo') || limparTexto(k).includes('genero')
-);
+                const sexoKey = colunas.find(k => limparTexto(k).includes('sexo') || limparTexto(k).includes('genero'));
                 const conclusivoKey = colunas.find(k => limparTexto(k).includes('conclusivo'));
                 const municipioKey = colunas.find(k => limparTexto(k).includes('municipio'));
                 const tipoUserKey = colunas.find(k => limparTexto(k).includes('tipo de usuario'));
@@ -366,10 +381,12 @@ Veja o arquivo LICENSE para mais detalhes.
                 const faixaEtaria = categorizarIdade(idadeExtraida, row[idadeKey]);
 
                 // 3. Tratamento de Datas e Municípios
-                const dateParsed = extractDateString(rawDate); // Agora usa o rawDate com prioridade
                 const anoExtraido = extrairAno(dateParsed);
                 const mesExtraido = extrairMes(dateParsed);
                 if (anoExtraido !== "Indefinido") anosEncontrados.add(anoExtraido);
+
+                const tipoUserExtraido = normalizarStr(row[tipoUserKey]);
+                if (tipoUserExtraido) tiposUserEncontrados.add(tipoUserExtraido);
 
                 const municipioExtraido = normalizarStr(row[municipioKey]);
                 if (municipioExtraido) municipiosEncontrados.add(municipioExtraido);
@@ -398,6 +415,7 @@ Veja o arquivo LICENSE para mais detalhes.
                 const outroStrOriginal = String(row[outroKey] || "").toUpperCase();
                 let serviçosDestaLinha = [];
 
+                // 1. Mapeia todos os serviços da múltipla escolha
                 for (const [catNome, chaves] of Object.entries(categoriasDicionario)) {
                     if (catNome === "Outros") continue;
                     for (const chave of chaves) {
@@ -407,10 +425,16 @@ Veja o arquivo LICENSE para mais detalhes.
                     }
                 }
 
-                if (outroStrOriginal.trim() !== "") {
+                // 2. Trava anti-sujeira para a coluna "especificar outro"
+                const testeOutro = outroStrOriginal.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                const ignorarRespostas = ["NAO", "NENHUM", "NADA", "N/A", "NA", "-", ".", "NENHUMA"];
+
+                // Só adiciona um serviço novo se o texto não estiver na lista de bloqueio
+                if (testeOutro !== "" && !ignorarRespostas.includes(testeOutro)) {
                     serviçosDestaLinha.push({ categoria: "Outros", subcategoria: padronizarOutros(outroStrOriginal) });
                 }
 
+                // 3. Trava final caso tudo esteja em branco
                 if (serviçosDestaLinha.length === 0) {
                     serviçosDestaLinha.push({ categoria: "Outros", subcategoria: "NÃO ESPECIFICADO" });
                 }
@@ -437,6 +461,9 @@ Veja o arquivo LICENSE para mais detalhes.
             // Atualização dos filtros e interface
             popularDropdown(document.getElementById('filter-ano'), Array.from(anosEncontrados).sort((a, b) => b - a)); 
             popularDropdown(document.getElementById('filter-municipio'), Array.from(municipiosEncontrados).sort());
+
+            popularDropdown(document.getElementById('perf-tipo'), Array.from(tiposUserEncontrados).sort());
+
             const fPerfServico = document.getElementById('perf-servico');
             if(fPerfServico) popularDropdown(fPerfServico, Object.keys(categoriasDicionario));
 
@@ -549,7 +576,6 @@ Veja o arquivo LICENSE para mais detalhes.
         }
 
         function renderizarAbaGeral(dados, vAno, vMes) {
-            // Conta registros únicos (pessoas únicas) usando o idLinha (índice da planilha original)
             const countUnique = (arr) => new Set(arr.map(d => d.idLinha)).size;
             
             let folhasTotais = 0;
@@ -562,16 +588,41 @@ Veja o arquivo LICENSE para mais detalhes.
             });
 
             const atualPessoas = countUnique(dados);
-            const atualMEIs = countUnique(dados.filter(d => d.categoria === 'Abertura de MEI' || d.categoria === 'DASN MEI'));
-
-            // Atualiza KPIs em tela
             document.getElementById('kpi-total').innerText = atualPessoas;
-            document.getElementById('kpi-mei').innerText = atualMEIs;
             document.getElementById('kpi-folhas').innerText = folhasTotais;
 
-            calcularEExibirCrescimento(vAno, vMes, atualPessoas, atualMEIs, folhasTotais);
+            // --- CÁLCULO DO PÚBLICO MAJORITÁRIO ---
+            const perfilContagem = {};
+            const linhasProcessadasPerfil = new Set();
+            
+            dados.forEach(d => {
+                if (!linhasProcessadasPerfil.has(d.idLinha)) {
+                    linhasProcessadasPerfil.add(d.idLinha);
+                    if (d.tipoUser && d.tipoUser.trim() !== "") {
+                        perfilContagem[d.tipoUser] = (perfilContagem[d.tipoUser] || 0) + 1;
+                    }
+                }
+            });
 
-            // Prepara dados para o gráfico de linha de tempo
+            let perfilDominante = "NÃO INFORMADO";
+            let maxAtendimentos = 0;
+            for (const [perfil, qtd] of Object.entries(perfilContagem)) {
+                if (qtd > maxAtendimentos) {
+                    maxAtendimentos = qtd;
+                    perfilDominante = perfil;
+                }
+            }
+
+            const perfilFormatado = perfilDominante.toLowerCase().replace(/(^\w|\s\w)/g, m => m.toUpperCase());
+            const pctDominante = atualPessoas > 0 ? ((maxAtendimentos / atualPessoas) * 100).toFixed(1) : 0;
+
+            document.getElementById('kpi-perfil-dominante').innerText = maxAtendimentos > 0 ? perfilFormatado : "Sem dados";
+            document.getElementById('kpi-perfil-dominante-porcentagem').innerText = maxAtendimentos > 0 ? `${pctDominante}% do total` : "";
+
+            // Adaptação da função de crescimento (passando 0 no parâmetro antigo do MEI para evitar quebra)
+            calcularEExibirCrescimento(vAno, vMes, atualPessoas, folhasTotais);
+
+            // Gráfico de Evolução Histórica
             const contagemData = {};
             dados.forEach(d => {
                 if(d.dataStr === "Data Indefinida") return;
@@ -592,26 +643,22 @@ Veja o arquivo LICENSE para mais detalhes.
         }
 
         // Calcula a variação percentual (crescimento) em relação ao mês/ano anterior
-        function calcularEExibirCrescimento(vAno, vMes, atualPessoas, atualMEIs, atualFolhas) {
+        function calcularEExibirCrescimento(vAno, vMes, atualPessoas, atualFolhas) {
             const elPessoas = document.getElementById('kpi-total-growth');
-            const elMEIs = document.getElementById('kpi-mei-growth');
             const elFolhas = document.getElementById('kpi-folhas-growth');
             
             if (vAno === "ALL") {
                 if(elPessoas) elPessoas.innerHTML = "";
-                if(elMEIs) elMEIs.innerHTML = "";
                 if(elFolhas) elFolhas.innerHTML = "";
                 return;
             }
 
             let filtroAnoPassado, filtroMesPassado, textoContexto;
-            // Se Mês = Todos, compara o Ano atual com o Ano passado
             if (vMes === "ALL") {
                 filtroAnoPassado = (parseInt(vAno) - 1).toString();
                 filtroMesPassado = "ALL";
                 textoContexto = "vs. ano anterior";
             } else {
-                // Se um Mês específico está filtrado, compara com o Mês anterior
                 let prevMes = parseInt(vMes) - 1;
                 let prevAno = parseInt(vAno);
                 if (prevMes === 0) { prevMes = 12; prevAno -= 1; }
@@ -627,7 +674,6 @@ Veja o arquivo LICENSE para mais detalhes.
             
             const countUnique = (arr) => new Set(arr.map(d => d.idLinha)).size;
             const passadoPessoas = countUnique(basePassada);
-            const passadoMEIs = countUnique(basePassada.filter(d => d.categoria === 'Abertura de MEI' || d.categoria === 'DASN MEI'));
             
             let passadoFolhas = 0;
             const lPassadas = new Set();
@@ -643,7 +689,6 @@ Veja o arquivo LICENSE para mais detalhes.
             };
 
             if(elPessoas) elPessoas.innerHTML = formatHTML(atualPessoas, passadoPessoas);
-            if(elMEIs) elMEIs.innerHTML = formatHTML(atualMEIs, passadoMEIs);
             if(elFolhas) elFolhas.innerHTML = formatHTML(atualFolhas, passadoFolhas);
         }
 
@@ -720,6 +765,29 @@ Veja o arquivo LICENSE para mais detalhes.
                     (vConclusao === "ALL" || d.conclusivo.includes(vConclusao)) &&
                     (vGenero === "ALL" || d.sexo === vGenero); 
             });
+
+            // --- NOVO: GERAR GRÁFICO DE TIPO DE USUÁRIO ---
+            const tipoUserPorPessoa = {};
+            dadosLocais.forEach(d => {
+                if (d.tipoUser && !tipoUserPorPessoa[d.idLinha]) {
+                    tipoUserPorPessoa[d.idLinha] = d.tipoUser;
+                }
+            });
+
+            const contagemTipoUser = {};
+            Object.values(tipoUserPorPessoa).forEach(tipo => {
+                contagemTipoUser[tipo] = (contagemTipoUser[tipo] || 0) + 1;
+            });
+
+            const sortedTipoUser = Object.entries(contagemTipoUser).sort((a, b) => b[1] - a[1]);
+            const labelsTipoUser = sortedTipoUser.map(item => item[0].toLowerCase().replace(/(^\w|\s\w)/g, m => m.toUpperCase()));
+            const valoresTipoUser = sortedTipoUser.map(item => item[1]);
+
+            const temTipoUser = valoresTipoUser.length > 0;
+            toggleEmptyState('chartTipoUsuario', temTipoUser);
+            if (temTipoUser) {
+                criarGrafico('chartTipoUsuario', 'bar', labelsTipoUser, valoresTipoUser, 'Pessoas', '#4f46e5', false, 'x');
+            }
 
             // Calcula Média de Idade (considerando pessoas únicas)
             const idadesUnicas = {};
