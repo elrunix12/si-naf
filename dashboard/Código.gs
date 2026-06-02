@@ -13,15 +13,11 @@
  * Veja o arquivo LICENSE para mais detalhes.
  */
 
-
 /**
  * @fileoverview Backend do Dashboard NAF (Google Apps Script)
  * Consolida múltiplas fontes de dados de forma inteligente e segura.
  */
 
-/**
- * Função obrigatória para servir o Web App.
- */
 function doGet() {
   return HtmlService.createTemplateFromFile('index')
       .evaluate()
@@ -31,84 +27,94 @@ function doGet() {
 
 /**
  * Extrai dados de várias planilhas e cria uma base de objetos consolidada.
- * Esta função é "inteligente": ela mapeia o cabeçalho de cada planilha 
- * individualmente antes de processar as linhas.
- * * @return {Array<Object>} Lista de registros higienizados para o frontend.
+ * Otimizada para alta performance usando filtragem prévia de colunas (Index Mapping).
+ *
+ * @return {Array<Object>} Lista de registros higienizados para o frontend.
  */
 function obterDadosPlanilha() {
   const propriedades = PropertiesService.getScriptProperties();
-  
-  // 1. Configuração das fontes (Busca nas Propriedades do Script)
+
+  // 1. Configuração das fontes de dados
   const fontes = [
     { id: propriedades.getProperty('PLANILHA_ID_1'), aba: propriedades.getProperty('TAB_NOME_1') },
     { id: propriedades.getProperty('PLANILHA_ID_2'), aba: propriedades.getProperty('TAB_NOME_2') },
     { id: propriedades.getProperty('PLANILHA_ID_3'), aba: propriedades.getProperty('TAB_NOME_3') }
   ].filter(f => f.id !== null);
 
+  const saltHash = propriedades.getProperty('SALT_HASH_CPF') || "Chave_Padrao_Temporaria_NAF_2026";
   let registrosConsolidados = [];
+
+  const regexProibido = /\b(cpf|cnpj|contribuinte|telefone|celular|email|e-mail|rg|identidade|nascimento|endereco|senha)\b/;
 
   // 2. Loop de Processamento por Planilha
   fontes.forEach((fonte) => {
     try {
       const ss = SpreadsheetApp.openById(fonte.id);
-      let sheet;
-
-      // Seleção da aba: Nome específico ou primeira da esquerda [0]
-      if (fonte.aba && fonte.aba.trim() !== "") {
-        sheet = ss.getSheetByName(fonte.aba);
-      } else {
-        sheet = ss.getSheets()[0]; 
-      }
+      let sheet = fonte.aba && fonte.aba.trim() !== "" ? ss.getSheetByName(fonte.aba) : ss.getSheets()[0];
 
       if (!sheet) return;
 
       const values = sheet.getDataRange().getValues();
-      if (values.length <= 1) return; // Pula planilhas sem dados
+      if (values.length <= 1) return; 
 
-      const cabecalhoLocal = values[0]; // Pega o cabeçalho desta planilha específica
-      const linhasDeDados = values.slice(1); // Pega apenas o conteúdo
+      const cabecalhoLocal = values[0]; 
+      const linhasDeDados = values.slice(1); 
 
-      /**
-       * MAPEAMENTO INTELIGENTE:
-       * Transformamos cada linha em um objeto { "Nome da Coluna": "Valor" }
-       * baseando-se no cabeçalho desta planilha atual.
-       * Isso permite que as colunas estejam em ordens diferentes em cada ID.
-       */
+      // ==========================================
+      // ESTRATÉGIA SEGURA: MAPEAMENTO DE INJEÇÃO
+      // ==========================================
+      // Descobrimos os índices das colunas uma única vez antes de ler as linhas.
+      let indiceCpf = -1;
+      const colunasPermitidas = [];
+
+      cabecalhoLocal.forEach((nomeColuna, i) => {
+        if (!nomeColuna) return;
+        
+        const nomeOriginal = nomeColuna.toString();
+        const nomeTratado = nomeOriginal.toLowerCase().trim()
+          .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+        // Se for a coluna de CPF, memoriza o índice dela
+        if (nomeTratado === 'cpf' || nomeTratado.includes('cpf')) {
+          indiceCpf = i;
+          return;
+        }
+
+        // Se não for uma coluna proibida pelo Firewall, memoriza para leitura em lote
+        if (!regexProibido.test(nomeTratado)) {
+          colunasPermitidas.push({
+            nomeOriginal: nomeOriginal,
+            index: i
+          });
+        }
+      });
+
+      // 3. Processamento Ultra Rápido das Linhas
       linhasDeDados.forEach((linha) => {
         let registro = {};
-        
-        cabecalhoLocal.forEach((nomeColuna, i) => {
-          // 1. Prevenção: Ignora se a coluna for nula ou vazia
-          if (!nomeColuna) return;
 
-          const nomeOriginal = nomeColuna.toString();
+        // Tratamento isolado e seguro do CPF (com correção de zero à esquerda)
+        if (indiceCpf !== -1) {
+          const valorCpf = linha[indiceCpf];
+          const cpfLimpo = String(valorCpf || "").replace(/\D/g, '').padStart(11, '0');
           
-          // 2. Normalização para o FIREWALL
-          const nomeTratado = nomeOriginal.toLowerCase()
-            .trim()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "");
-
-          // 3. FIREWALL COM REGEX (Mais seguro contra falsos positivos)
-          // O \b garante que ele procura a palavra exata (ex: " rg "), não pedaços de palavras (ex: "carga")
-          const regexProibido = /\b(cpf|cnpj|contribuinte|telefone|celular|email|e-mail|rg|identidade|nascimento|endereco|senha)\b/;
-
-          // Testa se o nome da coluna bate com alguma das palavras proibidas
-          if (regexProibido.test(nomeTratado)) {
-            return; // Bloqueia e avança para a próxima coluna
+          if (cpfLimpo.length === 11) {
+            registro['usuarioHash'] = gerarHashAnonimo(cpfLimpo, saltHash);
           }
+        }
 
-          let valor = linha[i];
-
-          // 4. Formatação de Dados
+        // Processa apenas as colunas previamente aprovadas pelo mapa
+        colunasPermitidas.forEach((col) => {
+          const valor = linha[col.index];
+          
           if (valor instanceof Date) {
-            registro[nomeOriginal] = valor.toLocaleDateString('pt-BR');
+            registro[col.nomeOriginal] = valor.toLocaleDateString('pt-BR');
           } else {
-            registro[nomeOriginal] = valor;
+            registro[col.nomeOriginal] = valor;
           }
         });
 
-        // Só adiciona se o objeto não estiver vazio (garante que temos dados)
+        // Adiciona o registro se ele contiver informações válidas
         if (Object.keys(registro).length > 0) {
           registro["rowId"] = registrosConsolidados.length + 2;
           registrosConsolidados.push(registro);
@@ -120,6 +126,22 @@ function obterDadosPlanilha() {
     }
   });
 
-  // Retorna o "pacotão" de objetos prontos para os filtros do seu index.html
   return registrosConsolidados;
+}
+
+/**
+ * Gera um hash irreversível SHA-256 de forma segura (Pseudonimização).
+ */
+function gerarHashAnonimo(cpf, salt) {
+  const textoParaHashear = cpf + salt;
+  const signature = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, textoParaHashear);
+  let hexString = '';
+  for (let i = 0; i < signature.length; i++) {
+    let byte = signature[i];
+    if (byte < 0) byte += 256;
+    let hex = byte.toString(16);
+    if (hex.length === 1) hex = '0' + hex;
+    hexString += hex;
+  }
+  return hexString;
 }
