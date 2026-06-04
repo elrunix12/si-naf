@@ -50,40 +50,124 @@ Os indicadores no topo da aba "Geral" comparam o desempenho atual com o período
 
 
 ## 5. Prioridade e Trava de Datas (Fallback)
-O sistema possui regras de consistência para garantir que nenhum dado seja perdido e que a linha do tempo não seja distorcida por erros humanos (como o preenchimento de anos absurdos).
 
-* **Prioridade 1 (Data Oficial):** O sistema tenta buscar primeiro a coluna "Data de Atendimento".
-* **Regra de Consistência (Trava de 2021):** Se a "Data de Atendimento" foi preenchida, mas o ano for **anterior a 2021** (ex: digitação errada como 2015 ou 2010), o sistema invalida essa entrada para proteger o gráfico histórico.
-* **Prioridade 2 (Fallback Automático):** Caso a "Data de Atendimento" esteja vazia **ou** tenha sido invalidada pela trava de 2021, o sistema utiliza o "Carimbo de Data/Hora" (Timestamp automático e inalterável do Google Forms) como a data oficial daquele atendimento.
+O sistema possui regras de consistência para garantir que a linha do tempo do dashboard não seja distorcida por erros humanos, como datas inexistentes, anos muito antigos ou datas futuras.
 
-**Trecho do código (`index.html`) responsável por essa regra:**
+A data usada no dashboard segue uma ordem de prioridade:
+
+* **Prioridade 1 (Data Oficial):** o sistema tenta usar primeiro a coluna **"Data de Atendimento"**.
+* **Validação de Calendário:** a data precisa existir de verdade no calendário. Exemplos inválidos, como `31/02/2024`, `99/99/2025` ou `00/13/2026`, são rejeitados.
+* **Trava de Data Mínima:** datas anteriores a **01/01/2021** são consideradas inválidas para proteger o gráfico histórico.
+* **Trava de Data Máxima:** datas posteriores ao dia atual também são consideradas inválidas, pois o formulário registra apenas atendimentos já realizados.
+* **Prioridade 2 (Fallback Automático):** se a **"Data de Atendimento"** estiver vazia ou for inválida, o sistema tenta usar o **"Carimbo de Data/Hora"**, que é o timestamp automático gerado pelo Google Forms.
+* **Descarte Seguro:** se nem a **"Data de Atendimento"** nem o **"Carimbo"** forem datas válidas, a linha é ignorada no processamento.
+
+Essa regra evita que datas digitadas incorretamente prejudiquem os filtros de ano/mês, o gráfico de evolução histórica e os cálculos comparativos do dashboard.
+
+**Trecho principal do código (`index.html`) responsável pela escolha da data:**
+
 ```javascript
 // 1. Localização Inteligente de Colunas (Prioriza "Data de Atendimento")
 const keyAtendimento = colunas.find(k => limparTexto(k).includes('data de atendimento'));
 const keyCarimbo = colunas.find(k => limparTexto(k).includes('carimbo'));
 
-let rawDate = "";
 const dataAtendimentoStr = keyAtendimento ? String(row[keyAtendimento] || "").trim() : "";
 const carimboStr = keyCarimbo ? String(row[keyCarimbo] || "").trim() : "";
 
-if (dataAtendimentoStr !== "") {
-    // Extrai o ano da Data de Atendimento para fazer a checagem
-    const anoInformado = parseInt(extrairAno(extractDateString(dataAtendimentoStr)));
-    
-    // TRAVA: Se o ano for reconhecido e for menor que 2021, ignora e usa o Carimbo
-    if (!isNaN(anoInformado) && anoInformado < 2021) {
-        rawDate = carimboStr;
-    } else {
-        rawDate = dataAtendimentoStr; // Data válida e >= 2021
-    }
-} else if (carimboStr !== "") {
-    rawDate = carimboStr; // Plano B: se atendimento estiver vazio, usa carimbo
+const dataResolvida = resolverDataAtendimento(dataAtendimentoStr, carimboStr);
+
+// Se nem Data de Atendimento nem Carimbo forem datas válidas, ignora a linha
+if (!dataResolvida) return;
+
+const dateParsed = dataResolvida.dataStr;
+```
+
+**Funções auxiliares responsáveis pela validação real da data:**
+
+```javascript
+const DATA_MINIMA_ATENDIMENTO = new Date(2021, 0, 1); // 01/01/2021
+
+function obterHojeSemHorario() {
+    const hoje = new Date();
+    return new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
 }
 
-// --- TRAVA DE DATA VAZIA E CABEÇALHOS ---
-// Se a data estiver vazia, não tiver números ou for o cabeçalho, pula a linha
-if (!rawDate || !/\d/.test(rawDate) || rawDate.toLowerCase().includes('carimbo')) return;
+function parseDataBrasileira(raw) {
+    if (!raw) return null;
+
+    const texto = String(raw).trim();
+
+    // Aceita datas no padrão DD/MM/AAAA ou DD-MM-AAAA
+    // Mantém ano com 4 dígitos para evitar ambiguidade.
+    const match = texto.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if (!match) return null;
+
+    const dia = Number(match[1]);
+    const mes = Number(match[2]);
+    const ano = Number(match[3]);
+
+    const data = new Date(ano, mes - 1, dia);
+
+    // Confirma se o JavaScript não "corrigiu" uma data inválida.
+    // Ex.: 31/02/2024 viraria março se não houvesse esta trava.
+    const dataExiste =
+        data.getFullYear() === ano &&
+        data.getMonth() === mes - 1 &&
+        data.getDate() === dia;
+
+    if (!dataExiste) return null;
+
+    return data;
+}
+
+function dataDentroDoIntervalo(data) {
+    if (!data) return false;
+
+    const hoje = obterHojeSemHorario();
+
+    return data >= DATA_MINIMA_ATENDIMENTO && data <= hoje;
+}
+
+function formatarDataDashboard(data) {
+    const dia = String(data.getDate()).padStart(2, '0');
+    const mes = String(data.getMonth() + 1).padStart(2, '0');
+    const ano = data.getFullYear();
+
+    return `${dia}/${mes}/${ano}`;
+}
+
+function resolverDataAtendimento(dataAtendimentoRaw, carimboRaw) {
+    const dataAtendimento = parseDataBrasileira(dataAtendimentoRaw);
+
+    if (dataDentroDoIntervalo(dataAtendimento)) {
+        return {
+            dataStr: formatarDataDashboard(dataAtendimento),
+            origem: "DATA_ATENDIMENTO"
+        };
+    }
+
+    const dataCarimbo = parseDataBrasileira(carimboRaw);
+
+    if (dataDentroDoIntervalo(dataCarimbo)) {
+        return {
+            dataStr: formatarDataDashboard(dataCarimbo),
+            origem: "CARIMBO"
+        };
+    }
+
+    return null;
+}
 ```
+
+**Resumo da regra:**
+
+```text
+1. Tenta usar Data de Atendimento.
+2. Se a data existir no calendário e estiver entre 01/01/2021 e hoje, usa essa data.
+3. Se a Data de Atendimento for inválida, tenta usar o Carimbo.
+4. Se o Carimbo também for inválido, a linha é ignorada.
+```
+> Observação: o campo interno `origemData` registra se a data usada veio da coluna `DATA_ATENDIMENTO` ou do fallback `CARIMBO`, facilitando auditoria e futuras melhorias.
 
 ## 6. Cálculo da Taxa de Retorno (Fidelização)
 

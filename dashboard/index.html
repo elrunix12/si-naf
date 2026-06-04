@@ -431,30 +431,15 @@ Veja o arquivo LICENSE para mais detalhes.
                 const keyAtendimento = colunas.find(k => limparTexto(k).includes('data de atendimento'));
                 const keyCarimbo = colunas.find(k => limparTexto(k).includes('carimbo'));
 
-                let rawDate = "";
                 const dataAtendimentoStr = keyAtendimento ? String(row[keyAtendimento] || "").trim() : "";
                 const carimboStr = keyCarimbo ? String(row[keyCarimbo] || "").trim() : "";
 
-                if (dataAtendimentoStr !== "") {
-                    // Extrai o ano da Data de Atendimento para fazer a checagem
-                    const anoInformado = parseInt(extrairAno(extractDateString(dataAtendimentoStr)));
-                    
-                    // TRAVA: Se o ano for reconhecido e for menor que 2021, ignora e usa o Carimbo
-                    if (!isNaN(anoInformado) && anoInformado < 2021) {
-                        rawDate = carimboStr;
-                    } else {
-                        rawDate = dataAtendimentoStr; // Data válida e >= 2021
-                    }
-                } else if (carimboStr !== "") {
-                    rawDate = carimboStr; // Plano B: se atendimento estiver vazio, usa carimbo
-                }
+                const dataResolvida = resolverDataAtendimento(dataAtendimentoStr, carimboStr);
 
-                // --- TRAVA DE DATA VAZIA E CABEÇALHOS ---
-                // Usa a função auxiliar para checar se existe um formato de data real (DD/MM/YYYY)
-                const dateParsed = extractDateString(rawDate);
-                
-                // Se não for uma data válida ou se for a linha de cabeçalho, ignora a linha completamente
-                if (dateParsed === "Data Indefinida" || rawDate.toLowerCase().includes('carimbo')) return;
+                // Se nem Data de Atendimento nem Carimbo forem datas válidas, ignora a linha
+                if (!dataResolvida) return;
+
+                const dateParsed = dataResolvida.dataStr;
 
                 // Localiza as demais chaves com a mesma lógica de proteção
                 const folhasKey = colunas.find(k => limparTexto(k).includes('folhas'));
@@ -535,6 +520,7 @@ Veja o arquivo LICENSE para mais detalhes.
                         idLinha: index,
                         usuarioHash: row['usuarioHash'] || null, // <- NOVA LINHA
                         dataStr: dateParsed,
+                        origemData: dataResolvida.origem,
                         ano: anoExtraido,
                         mes: mesExtraido,
                         municipio: municipioExtraido,
@@ -1024,22 +1010,97 @@ Veja o arquivo LICENSE para mais detalhes.
 
         function normalizarStr(str) { return str ? String(str).toUpperCase().trim() : ""; }
         
-        function extractDateString(raw) { 
-            // Procura padrão de data (DD/MM/YYYY ou similar)
-            const m = raw.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/); 
-            return m ? m[1] : "Data Indefinida"; 
+        const DATA_MINIMA_ATENDIMENTO = new Date(2021, 0, 1); // 01/01/2021
+
+        function obterHojeSemHorario() {
+            const hoje = new Date();
+            return new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
         }
-        
+
+        function parseDataBrasileira(raw) {
+            if (!raw) return null;
+
+            const texto = String(raw).trim();
+
+            // Aceita datas no padrão DD/MM/AAAA ou DD-MM-AAAA
+            // Mantém ano com 4 dígitos para evitar ambiguidade.
+            const match = texto.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+            if (!match) return null;
+
+            const dia = Number(match[1]);
+            const mes = Number(match[2]);
+            const ano = Number(match[3]);
+
+            const data = new Date(ano, mes - 1, dia);
+
+            // Confirma se o JS não "corrigiu" uma data inválida.
+            // Ex.: 31/02/2024 viraria março se não houvesse esta trava.
+            const dataExiste =
+                data.getFullYear() === ano &&
+                data.getMonth() === mes - 1 &&
+                data.getDate() === dia;
+
+            if (!dataExiste) return null;
+
+            return data;
+        }
+
+        function dataDentroDoIntervalo(data) {
+            if (!data) return false;
+
+            const hoje = obterHojeSemHorario();
+
+            return data >= DATA_MINIMA_ATENDIMENTO && data <= hoje;
+        }
+
+        function formatarDataDashboard(data) {
+            const dia = String(data.getDate()).padStart(2, '0');
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const ano = data.getFullYear();
+
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        function resolverDataAtendimento(dataAtendimentoRaw, carimboRaw) {
+            const dataAtendimento = parseDataBrasileira(dataAtendimentoRaw);
+
+            if (dataDentroDoIntervalo(dataAtendimento)) {
+                return {
+                    dataStr: formatarDataDashboard(dataAtendimento),
+                    origem: "DATA_ATENDIMENTO"
+                };
+            }
+
+            const dataCarimbo = parseDataBrasileira(carimboRaw);
+
+            if (dataDentroDoIntervalo(dataCarimbo)) {
+                return {
+                    dataStr: formatarDataDashboard(dataCarimbo),
+                    origem: "CARIMBO"
+                };
+            }
+
+            return null;
+        }
+
+        function extractDateString(raw) {
+            const data = parseDataBrasileira(raw);
+
+            if (!dataDentroDoIntervalo(data)) {
+                return "Data Indefinida";
+            }
+
+            return formatarDataDashboard(data);
+        }
+
         function extrairAno(dateStr) {
-            if (dateStr === "Data Indefinida") return "Indefinido";
-            const p = dateStr.split(/[\/\-]/);
-            return p.length >= 3 ? (p[2].length === 4 ? p[2] : p[0]) : "Indefinido";
+            const data = parseDataBrasileira(dateStr);
+            return data ? String(data.getFullYear()) : "Indefinido";
         }
-        
+
         function extrairMes(dateStr) {
-            if (dateStr === "Data Indefinida") return "Indefinido";
-            const p = dateStr.split(/[\/\-]/);
-            return p.length >= 3 ? p[1].padStart(2, '0') : "Indefinido";
+            const data = parseDataBrasileira(dateStr);
+            return data ? String(data.getMonth() + 1).padStart(2, '0') : "Indefinido";
         }
         
         // Alimenta dinamicamente as opções `<option>` de um select
