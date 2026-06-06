@@ -16,7 +16,7 @@ O projeto foi construído com foco em segurança e estabilidade, utilizando **ze
 
 * **Frontend:** [`index.html`](index.html) — Interface principal em HTML5/JavaScript, responsável pela estrutura da página, filtros, abas, KPIs e renderização dos gráficos.
 
-* **Estilos Locais:** `style.html` — Arquivo injetado no `index.html`, contendo o Tailwind CSS compilado localmente e regras visuais específicas do Dashboard.
+* **Estilos Locais:** [`style.html`](style.html) — Arquivo injetado no `index.html`, contendo o Tailwind CSS compilado localmente e regras visuais específicas do Dashboard.
 
 * **Backend:** [`Código.gs`](Código.gs) — Motor de processamento, sanitização, consolidação e entrega dos dados em Google Apps Script (GAS).
 
