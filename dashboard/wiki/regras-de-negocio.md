@@ -49,7 +49,7 @@ Os indicadores no topo da aba "Geral" comparam o desempenho atual com o período
     * ⚪ **Cinza (S/ Base):** Não existem dados no ano/mês anterior para realizar a comparação.
 
 
-## 5. Prioridade e Trava de Datas (Fallback)
+## 5. Validação de Datas, Estimativa por Mediana e Fallback
 
 O sistema possui regras de consistência para garantir que a linha do tempo do dashboard não seja distorcida por erros humanos, como datas inexistentes, anos muito antigos ou datas futuras.
 
@@ -59,12 +59,304 @@ A data usada no dashboard segue uma ordem de prioridade:
 * **Validação de Calendário:** a data precisa existir de verdade no calendário. Exemplos inválidos, como `31/02/2024`, `99/99/2025` ou `00/13/2026`, são rejeitados.
 * **Trava de Data Mínima:** datas anteriores a **01/01/2021** são consideradas inválidas para proteger o gráfico histórico.
 * **Trava de Data Máxima:** datas posteriores ao dia atual também são consideradas inválidas, pois o formulário registra apenas atendimentos já realizados.
-* **Prioridade 2 (Fallback Automático):** se a **"Data de Atendimento"** estiver vazia ou for inválida, o sistema tenta usar o **"Carimbo de Data/Hora"**, que é o timestamp automático gerado pelo Google Forms.
+* **Estimativa por Mediana:** quando a **"Data de Atendimento"** foi preenchida, mas é inválida, o sistema tenta estimar a provável data do atendimento usando o **Carimbo de Data/Hora** menos a mediana histórica de atraso no lançamento.
+* **Fallback Automático:** se a mediana não for confiável ou não houver amostra suficiente, o sistema utiliza o **"Carimbo de Data/Hora"**, que é o timestamp automático gerado pelo Google Forms.
 * **Descarte Seguro:** se nem a **"Data de Atendimento"** nem o **"Carimbo"** forem datas válidas, a linha é ignorada no processamento.
 
 Essa regra evita que datas digitadas incorretamente prejudiquem os filtros de ano/mês, o gráfico de evolução histórica e os cálculos comparativos do dashboard.
 
-**Trecho principal do código (`index.html`) responsável pela escolha da data:**
+---
+
+### 5.1. Como a mediana é calculada
+
+A mediana mede o atraso típico entre a data real do atendimento e o momento em que o atendimento foi lançado no formulário.
+
+O cálculo usa a diferença:
+
+```text
+Carimbo de Data/Hora - Data de Atendimento
+```
+
+Exemplo:
+
+```text
+Data de Atendimento: 10/05/2026
+Carimbo: 12/05/2026
+Atraso: 2 dias
+```
+
+Quando uma linha possui **Data de Atendimento inválida**, mas possui **Carimbo válido**, o sistema estima:
+
+```text
+Data estimada = Carimbo - mediana de atraso
+```
+
+Exemplo:
+
+```text
+Carimbo: 20/05/2026
+Mediana histórica: 2 dias
+Data estimada: 18/05/2026
+```
+
+---
+
+### 5.2. Janela móvel de 365 dias
+
+A mediana não é calculada com base na data atual.
+
+Para cada linha problemática, o sistema usa os **365 dias anteriores ao Carimbo daquela própria linha**.
+
+Exemplo:
+
+```text
+Linha problemática:
+Carimbo = 10/08/2025
+
+Janela usada para calcular a mediana:
+10/08/2024 até 10/08/2025
+```
+
+Essa regra é importante porque o padrão de lançamento pode mudar ao longo do tempo, especialmente em ambientes com rotatividade de voluntários.
+
+---
+
+### 5.3. Critérios para a mediana ser considerada confiável
+
+A mediana só é usada quando existe uma base mínima de registros válidos.
+
+O sistema considera confiável apenas a mediana calculada com:
+
+* pelo menos **30 registros válidos** na janela de 365 dias;
+* registros com **Data de Atendimento válida**;
+* registros com **Carimbo válido**;
+* registros em que a Data de Atendimento seja igual ou anterior ao Carimbo;
+* atrasos entre **0 e 90 dias**;
+* dados reais, sem usar datas já estimadas para gerar novas estimativas.
+
+Se esses critérios não forem atendidos, a mediana é considerada não confiável e o sistema usa o Carimbo como fallback.
+
+O limite de **90 dias** foi adotado porque o período de declaração do Imposto de Renda costuma durar pouco mais de dois meses. Assim, o sistema aceita atrasos operacionais maiores durante períodos de alta demanda, sem considerar automaticamente esses registros como extremos.
+
+---
+
+#### Exemplos de mediana confiável
+
+A mediana é considerada confiável quando existe uma quantidade suficiente de registros válidos e coerentes dentro da janela de 365 dias.
+
+Exemplo:
+
+```text
+Linha problemática:
+Data de Atendimento = 31/02/2026
+Carimbo = 20/05/2026
+```
+
+O sistema procura registros válidos entre:
+
+```text
+20/05/2025 e 20/05/2026
+```
+
+Suponha que ele encontre 45 registros válidos com atrasos como:
+
+```text
+0, 1, 1, 1, 2, 2, 2, 3, 3, 4...
+```
+
+Como há pelo menos 30 registros válidos, todos com atraso entre 0 e 90 dias, a mediana pode ser usada.
+
+Se a mediana for:
+
+```text
+2 dias
+```
+
+A data estimada será:
+
+```text
+20/05/2026 - 2 dias = 18/05/2026
+```
+
+Nesse caso, o atendimento entra no dashboard com:
+
+```text
+origemData = ESTIMADA_MEDIANA
+medianaDias = 2
+```
+
+#### Exemplos de mediana não confiável
+
+A mediana não é usada quando a base de comparação não é suficiente ou contém dados incoerentes.
+
+Exemplo 1 — poucos registros válidos:
+
+```text
+Linha problemática:
+Data de Atendimento = 99/99/2026
+Carimbo = 20/05/2026
+```
+
+Na janela de 365 dias, o sistema encontra apenas:
+
+```text
+12 registros válidos
+```
+
+Como o mínimo exigido é 30 registros válidos, a mediana é considerada não confiável.
+
+Nesse caso, o sistema usa o Carimbo como fallback:
+
+```text
+dataStr = 20/05/2026
+origemData = CARIMBO
+medianaDias = null
+```
+
+Exemplo 2 — registros com atraso negativo:
+
+```text
+Data de Atendimento = 25/05/2026
+Carimbo = 20/05/2026
+```
+
+Esse registro indica que o formulário teria sido enviado antes do atendimento acontecer. Por isso, ele não entra no cálculo da mediana.
+
+Exemplo 3 — atraso extremo:
+
+```text
+Data de Atendimento = 01/01/2026
+Carimbo = 20/05/2026
+```
+
+A diferença é maior que 90 dias. Como esse atraso foge do padrão esperado, o registro não entra no cálculo da mediana.
+
+Se, depois de remover atrasos negativos e extremos, sobrarem menos de 30 registros válidos, a mediana não é usada e o sistema mantém o fallback pelo Carimbo.
+
+
+### 5.4. Como alterar os parâmetros de validação
+
+Alguns limites da regra de datas podem ser ajustados diretamente nas constantes do `index.html`.
+
+#### Alterar a data mínima aceita
+
+A data mínima aceita pelo dashboard é definida nesta constante:
+
+```javascript
+const DATA_MINIMA_ATENDIMENTO = new Date(2021, 0, 1); // 01/01/2021
+```
+
+Para alterar o ano mínimo, ajuste o primeiro número.
+
+Exemplo: para aceitar datas a partir de 01/01/2020:
+
+```javascript
+const DATA_MINIMA_ATENDIMENTO = new Date(2020, 0, 1); // 01/01/2020
+```
+
+Observação: em JavaScript, os meses começam em zero. Por isso:
+
+```text
+0 = janeiro
+1 = fevereiro
+2 = março
+...
+11 = dezembro
+```
+
+#### Alterar o limite máximo de atraso da mediana
+
+O atraso máximo aceito no cálculo da mediana é definido nesta constante:
+
+```javascript
+const ATRASO_MAXIMO_MEDIANA_DIAS = 90;
+```
+
+Esse valor indica o maior intervalo permitido entre a **Data de Atendimento** e o **Carimbo de Data/Hora** para que um registro entre no cálculo da mediana.
+
+Exemplo: para aceitar apenas atrasos de até 60 dias:
+
+```javascript
+const ATRASO_MAXIMO_MEDIANA_DIAS = 60;
+```
+
+Exemplo: para aceitar atrasos de até 120 dias:
+
+```javascript
+const ATRASO_MAXIMO_MEDIANA_DIAS = 120;
+```
+
+Aumentar esse valor torna a mediana mais tolerante a lançamentos tardios. Reduzir esse valor torna o cálculo mais rígido e remove mais registros considerados fora do padrão.
+
+#### Alterar a quantidade mínima de registros para confiar na mediana
+
+A quantidade mínima de registros válidos é definida nesta constante:
+
+```javascript
+const AMOSTRA_MINIMA_MEDIANA = 30;
+```
+
+Se houver menos registros válidos do que esse limite dentro da janela de 365 dias, o sistema não usa a mediana e mantém o fallback pelo Carimbo.
+
+#### Alterar a janela histórica da mediana
+
+A janela usada para calcular a mediana é definida nesta constante:
+
+```javascript
+const JANELA_MEDIANA_DIAS = 365;
+```
+
+Esse valor representa os 365 dias anteriores ao Carimbo da própria linha problemática.
+
+Exemplo: para usar uma janela de 180 dias:
+
+```javascript
+const JANELA_MEDIANA_DIAS = 180;
+```
+
+Exemplo: para usar uma janela de 730 dias:
+
+```javascript
+const JANELA_MEDIANA_DIAS = 730;
+```
+
+A janela não é calculada a partir da data atual. Ela sempre usa como referência o **Carimbo de Data/Hora** da linha que precisa ser corrigida.
+
+
+### 5.5. Origem da data usada
+
+Cada atendimento tratado recebe um campo interno chamado `origemData`, que indica de onde veio a data usada no dashboard.
+
+Os valores possíveis são:
+
+```text
+DATA_ATENDIMENTO
+CARIMBO
+ESTIMADA_MEDIANA
+```
+
+Significado:
+
+* **DATA_ATENDIMENTO:** a data oficial foi considerada válida e usada diretamente.
+* **CARIMBO:** a Data de Atendimento estava vazia ou inválida, e o sistema usou o timestamp do Google Forms.
+* **ESTIMADA_MEDIANA:** a Data de Atendimento estava inválida, e o sistema estimou a data usando a mediana histórica de atraso.
+
+Esse campo permite auditoria e também viabiliza o botão de ocultar/exibir datas estimadas no dashboard.
+
+---
+
+### 5.6. Botão para ocultar ou exibir datas estimadas
+
+Quando existem registros com `origemData = "ESTIMADA_MEDIANA"`, o dashboard exibe um botão para controlar a visualização dessas datas.
+
+* **Ocultar estimadas:** remove temporariamente os registros estimados dos KPIs e gráficos.
+* **Exibir estimadas:** inclui novamente os registros estimados no dashboard.
+
+Esse controle permite comparar os indicadores com e sem registros estimados.
+
+---
+
+### 5.7. Trecho principal do código responsável pela escolha da data
 
 ```javascript
 // 1. Localização Inteligente de Colunas (Prioriza "Data de Atendimento")
@@ -74,7 +366,7 @@ const keyCarimbo = colunas.find(k => limparTexto(k).includes('carimbo'));
 const dataAtendimentoStr = keyAtendimento ? String(row[keyAtendimento] || "").trim() : "";
 const carimboStr = keyCarimbo ? String(row[keyCarimbo] || "").trim() : "";
 
-const dataResolvida = resolverDataAtendimento(dataAtendimentoStr, carimboStr);
+const dataResolvida = resolverDataAtendimento(dataAtendimentoStr, carimboStr, contextoMediana);
 
 // Se nem Data de Atendimento nem Carimbo forem datas válidas, ignora a linha
 if (!dataResolvida) return;
@@ -82,92 +374,19 @@ if (!dataResolvida) return;
 const dateParsed = dataResolvida.dataStr;
 ```
 
-**Funções auxiliares responsáveis pela validação real da data:**
+---
 
-```javascript
-const DATA_MINIMA_ATENDIMENTO = new Date(2021, 0, 1); // 01/01/2021
-
-function obterHojeSemHorario() {
-    const hoje = new Date();
-    return new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
-}
-
-function parseDataBrasileira(raw) {
-    if (!raw) return null;
-
-    const texto = String(raw).trim();
-
-    // Aceita datas no padrão DD/MM/AAAA ou DD-MM-AAAA
-    // Mantém ano com 4 dígitos para evitar ambiguidade.
-    const match = texto.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-    if (!match) return null;
-
-    const dia = Number(match[1]);
-    const mes = Number(match[2]);
-    const ano = Number(match[3]);
-
-    const data = new Date(ano, mes - 1, dia);
-
-    // Confirma se o JavaScript não "corrigiu" uma data inválida.
-    // Ex.: 31/02/2024 viraria março se não houvesse esta trava.
-    const dataExiste =
-        data.getFullYear() === ano &&
-        data.getMonth() === mes - 1 &&
-        data.getDate() === dia;
-
-    if (!dataExiste) return null;
-
-    return data;
-}
-
-function dataDentroDoIntervalo(data) {
-    if (!data) return false;
-
-    const hoje = obterHojeSemHorario();
-
-    return data >= DATA_MINIMA_ATENDIMENTO && data <= hoje;
-}
-
-function formatarDataDashboard(data) {
-    const dia = String(data.getDate()).padStart(2, '0');
-    const mes = String(data.getMonth() + 1).padStart(2, '0');
-    const ano = data.getFullYear();
-
-    return `${dia}/${mes}/${ano}`;
-}
-
-function resolverDataAtendimento(dataAtendimentoRaw, carimboRaw) {
-    const dataAtendimento = parseDataBrasileira(dataAtendimentoRaw);
-
-    if (dataDentroDoIntervalo(dataAtendimento)) {
-        return {
-            dataStr: formatarDataDashboard(dataAtendimento),
-            origem: "DATA_ATENDIMENTO"
-        };
-    }
-
-    const dataCarimbo = parseDataBrasileira(carimboRaw);
-
-    if (dataDentroDoIntervalo(dataCarimbo)) {
-        return {
-            dataStr: formatarDataDashboard(dataCarimbo),
-            origem: "CARIMBO"
-        };
-    }
-
-    return null;
-}
-```
-
-**Resumo da regra:**
+### 5.8. Resumo da regra
 
 ```text
-1. Tenta usar Data de Atendimento.
-2. Se a data existir no calendário e estiver entre 01/01/2021 e hoje, usa essa data.
-3. Se a Data de Atendimento for inválida, tenta usar o Carimbo.
-4. Se o Carimbo também for inválido, a linha é ignorada.
+1. Tenta usar a Data de Atendimento.
+2. Se a Data de Atendimento for válida, usa essa data.
+3. Se a Data de Atendimento foi preenchida, mas é inválida, tenta estimar por mediana.
+4. A mediana usa os 365 dias anteriores ao Carimbo da própria linha.
+5. Se a mediana for confiável, usa Carimbo - mediana.
+6. Se a mediana não for confiável, usa o Carimbo.
+7. Se o Carimbo também for inválido, ignora a linha.
 ```
-> Observação: o campo interno `origemData` registra se a data usada veio da coluna `DATA_ATENDIMENTO` ou do fallback `CARIMBO`, facilitando auditoria e futuras melhorias.
 
 ## 6. Cálculo da Taxa de Retorno (Fidelização)
 

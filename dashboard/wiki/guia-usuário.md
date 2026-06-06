@@ -66,6 +66,21 @@ Na aba **Operacional**, o gráfico agrupa serviços pouco frequentes na categori
 
 Nos gráficos de pizza ou barras, você pode clicar nos itens da **Legenda** para desativar temporariamente aquela cor, permitindo focar apenas nos dados que restaram.
 
+### Ocultar/Exibir Datas Estimadas
+
+Em alguns casos, o aluno pode preencher a **Data de Atendimento** de forma incorreta, como uma data inexistente, muito antiga ou futura.
+
+Quando isso acontece, o Dashboard pode estimar uma data provável de atendimento usando o histórico de atraso entre a data real do atendimento e o momento em que o formulário foi enviado.
+
+Quando houver registros estimados, aparecerá no topo da página o botão **"Ocultar estimadas"**.
+
+* **Ocultar estimadas:** remove temporariamente os registros com datas estimadas dos indicadores e gráficos.
+* **Exibir estimadas:** inclui novamente esses registros no Dashboard.
+
+Esse recurso permite comparar os resultados com e sem datas estimadas.
+
+> Observação: datas estimadas são usadas apenas quando a data informada no atendimento está inválida e existe base histórica suficiente para fazer uma aproximação segura. Caso contrário, o sistema usa o Carimbo de Data/Hora do Google Forms como referência.
+
 
 ## 5. Dicas de Interpretação
 
@@ -79,3 +94,5 @@ Nos gráficos de pizza ou barras, você pode clicar nos itens da **Legenda** par
 * **"O gráfico aparece escrito 'Sem dados'":** Isso significa que a combinação de filtros que você selecionou (Ex: Ano 2026 + Mês Janeiro + Cidade X) não possui nenhum atendimento registrado na planilha.
 * **"Os números parecem errados":** Verifique se o filtro de **Município** ou **Mês** não ficou selecionado acidentalmente no topo da página.
 * **"A página está em branco":** Tente atualizar (F5). Se o problema persistir, a planilha de dados pode ter sido movida ou renomeada.
+* **"Apareceu o botão 'Ocultar estimadas'":** Isso significa que alguns registros tinham datas de atendimento inválidas e o sistema estimou uma data provável para eles. Você pode clicar no botão para ver os indicadores sem esses registros estimados.
+* **"Os números mudaram quando cliquei em 'Ocultar estimadas'":** Isso é esperado. Ao ocultar datas estimadas, o Dashboard recalcula os KPIs e gráficos sem esses registros.

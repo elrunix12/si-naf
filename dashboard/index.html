@@ -65,6 +65,9 @@ Veja o arquivo LICENSE para mais detalhes.
             </div>
 
             <div class="flex items-center space-x-2 lg:space-x-4 flex-shrink-0">
+                <button id="btn-toggle-estimadas" class="hidden px-3 py-1.5 bg-blue-800 hover:bg-blue-700 text-blue-200 hover:text-white rounded transition shadow-inner text-xs font-semibold cursor-pointer" title="Ocultar datas estimadas por mediana">
+                    Ocultar estimadas
+                </button>
                 <button id="btn-toggle-labels" class="hidden p-2 bg-blue-800 hover:bg-blue-700 text-blue-200 hover:text-white rounded transition shadow-inner flex items-center justify-center cursor-pointer" title="Mostrar Números nos Gráficos">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                 </button>
@@ -283,6 +286,7 @@ Veja o arquivo LICENSE para mais detalhes.
         let currentTab = 'geral';    // Aba ativa no momento
         let viewSubcategorias = false; // Controle de visualização: Categorias principais vs "Outros" detalhados
         let mostrarNumeros = false;  // Controle do toggle de DataLabels
+        let mostrarDatasEstimadas = true; // Controle para mostrar/ocultar datas estimadas nos gráficos de linha
 
         // 2. CONFIGURAÇÃO GLOBAL DO CHART.JS
         Chart.register(ChartDataLabels);
@@ -338,6 +342,16 @@ Veja o arquivo LICENSE para mais detalhes.
         // ==========================================
         // 4 EVENT LISTENERS DOS CONTROLES (UI)
         // ==========================================
+        
+        // Botão de Toggle de Datas Estimadas por Mediana
+        const btnToggleEstimadas = document.getElementById('btn-toggle-estimadas');
+        if (btnToggleEstimadas) {
+            btnToggleEstimadas.addEventListener('click', () => {
+                mostrarDatasEstimadas = !mostrarDatasEstimadas;
+                atualizarBotaoEstimadas();
+                renderizarDashboard();
+            });
+        }
 
         // Botão de DataLabels (Mostrar números nos gráficos)
         const btnToggleLabels = document.getElementById('btn-toggle-labels');
@@ -423,6 +437,8 @@ Veja o arquivo LICENSE para mais detalhes.
             let municipiosEncontrados = new Set();
             let tiposUserEncontrados = new Set();
 
+            const contextoMediana = criarContextoMediana(rawData);
+
             rawData.forEach((row, index) => {
                 try {
                     const colunas = Object.keys(row);
@@ -434,7 +450,7 @@ Veja o arquivo LICENSE para mais detalhes.
                 const dataAtendimentoStr = keyAtendimento ? String(row[keyAtendimento] || "").trim() : "";
                 const carimboStr = keyCarimbo ? String(row[keyCarimbo] || "").trim() : "";
 
-                const dataResolvida = resolverDataAtendimento(dataAtendimentoStr, carimboStr);
+                const dataResolvida = resolverDataAtendimento(dataAtendimentoStr, carimboStr, contextoMediana);
 
                 // Se nem Data de Atendimento nem Carimbo forem datas válidas, ignora a linha
                 if (!dataResolvida) return;
@@ -521,6 +537,7 @@ Veja o arquivo LICENSE para mais detalhes.
                         usuarioHash: row['usuarioHash'] || null, // <- NOVA LINHA
                         dataStr: dateParsed,
                         origemData: dataResolvida.origem,
+                        medianaDias: dataResolvida.medianaDias !== undefined ? dataResolvida.medianaDias : null,
                         ano: anoExtraido,
                         mes: mesExtraido,
                         municipio: municipioExtraido,
@@ -552,7 +569,15 @@ Veja o arquivo LICENSE para mais detalhes.
             document.getElementById('empty-state').style.display = 'none';
             document.getElementById('dashboard-content').style.display = 'block';
             document.getElementById('global-filters-container').classList.replace('hidden', 'flex');
-            if(document.getElementById('btn-toggle-labels')) document.getElementById('btn-toggle-labels').classList.remove('hidden'); 
+            if(document.getElementById('btn-toggle-labels')) document.getElementById('btn-toggle-labels').classList.remove('hidden');
+            
+            const btnToggleEstimadas = document.getElementById('btn-toggle-estimadas');
+            const temDatasEstimadas = globalAtendimentos.some(d => d.origemData === "ESTIMADA_MEDIANA");
+
+            if (btnToggleEstimadas && temDatasEstimadas) {
+                btnToggleEstimadas.classList.remove('hidden');
+                atualizarBotaoEstimadas();
+            }
             
             renderizarDashboard();
         }
@@ -574,9 +599,10 @@ Veja o arquivo LICENSE para mais detalhes.
 
             // Aplica os filtros globais à base de dados
             const baseGlobalFiltrada = globalAtendimentos.filter(d => {
-                return (vAno === "ALL" || d.ano === vAno) &&
-                       (vMes === "ALL" || d.mes === vMes) &&
-                       (vMuni === "ALL" || d.municipio === vMuni);
+                return (mostrarDatasEstimadas || d.origemData !== "ESTIMADA_MEDIANA") &&
+                    (vAno === "ALL" || d.ano === vAno) &&
+                    (vMes === "ALL" || d.mes === vMes) &&
+                    (vMuni === "ALL" || d.municipio === vMuni);
             });
 
             // Direciona o processamento para a função da aba atual (Passando vMuni)
@@ -941,6 +967,23 @@ Veja o arquivo LICENSE para mais detalhes.
         // 7. FUNÇÕES AUXILIARES E CONSTRUTORES (UTILS)
         // ==========================================
 
+        function atualizarBotaoEstimadas() {
+            const btnToggleEstimadas = document.getElementById('btn-toggle-estimadas');
+            if (!btnToggleEstimadas) return;
+
+            if (mostrarDatasEstimadas) {
+                btnToggleEstimadas.innerText = "Ocultar estimadas";
+                btnToggleEstimadas.title = "Ocultar datas estimadas por mediana";
+                btnToggleEstimadas.classList.add('text-yellow-300');
+                btnToggleEstimadas.classList.remove('text-blue-200');
+            } else {
+                btnToggleEstimadas.innerText = "Exibir estimadas";
+                btnToggleEstimadas.title = "Exibir datas estimadas por mediana";
+                btnToggleEstimadas.classList.add('text-blue-200');
+                btnToggleEstimadas.classList.remove('text-yellow-300');
+            }
+        }
+
         function criarGrafico(canvasId, type, labels, data, dataLabel, color, isLine = false, indexAxis = 'x') {
             const ctx = document.getElementById(canvasId).getContext('2d');
             if(chartInstances[canvasId]) chartInstances[canvasId].destroy(); 
@@ -1012,6 +1055,100 @@ Veja o arquivo LICENSE para mais detalhes.
         
         const DATA_MINIMA_ATENDIMENTO = new Date(2021, 0, 1); // 01/01/2021
 
+        const JANELA_MEDIANA_DIAS = 365;
+        const AMOSTRA_MINIMA_MEDIANA = 30;
+        const ATRASO_MAXIMO_MEDIANA_DIAS = 90; // Evita distorção por casos extremos
+        const MS_DIA = 24 * 60 * 60 * 1000;
+
+        function normalizarDataSemHorario(data) {
+            return new Date(data.getFullYear(), data.getMonth(), data.getDate());
+        }
+
+        function dataParaUTC(data) {
+            return Date.UTC(data.getFullYear(), data.getMonth(), data.getDate());
+        }
+
+        function diferencaEmDias(dataFinal, dataInicial) {
+            return Math.round((dataParaUTC(dataFinal) - dataParaUTC(dataInicial)) / MS_DIA);
+        }
+
+        function adicionarDias(data, dias) {
+            const novaData = normalizarDataSemHorario(data);
+            novaData.setDate(novaData.getDate() + dias);
+            return normalizarDataSemHorario(novaData);
+        }
+
+        function criarContextoMediana(rawData) {
+            const paresValidos = [];
+
+            rawData.forEach(row => {
+                const colunas = Object.keys(row);
+
+                const keyAtendimento = colunas.find(k => limparTexto(k).includes('data de atendimento'));
+                const keyCarimbo = colunas.find(k => limparTexto(k).includes('carimbo'));
+
+                const dataAtendimentoStr = keyAtendimento ? String(row[keyAtendimento] || "").trim() : "";
+                const carimboStr = keyCarimbo ? String(row[keyCarimbo] || "").trim() : "";
+
+                const dataAtendimento = parseDataBrasileira(dataAtendimentoStr);
+                const dataCarimbo = parseDataBrasileira(carimboStr);
+
+                if (!dataDentroDoIntervalo(dataAtendimento) || !dataDentroDoIntervalo(dataCarimbo)) return;
+
+                const atrasoDias = diferencaEmDias(dataCarimbo, dataAtendimento);
+
+                // Só usa pares logicamente consistentes:
+                // Carimbo deve ser igual ou posterior à Data de Atendimento.
+                if (atrasoDias < 0) return;
+
+                // Remove atrasos extremos para evitar distorção.
+                if (atrasoDias > ATRASO_MAXIMO_MEDIANA_DIAS) return;
+
+                paresValidos.push({
+                    dataAtendimento,
+                    dataCarimbo,
+                    atrasoDias
+                });
+            });
+
+            return {
+                paresValidos
+            };
+        }
+
+        function calcularMedianaAtrasoPorCarimbo(dataCarimboReferencia, contextoMediana) {
+            if (!contextoMediana || !Array.isArray(contextoMediana.paresValidos)) return null;
+
+            const inicioJanela = adicionarDias(dataCarimboReferencia, -JANELA_MEDIANA_DIAS);
+
+            const atrasos = contextoMediana.paresValidos
+                .filter(item => {
+                    return item.dataCarimbo >= inicioJanela &&
+                        item.dataCarimbo <= dataCarimboReferencia;
+                })
+                .map(item => item.atrasoDias)
+                .sort((a, b) => a - b);
+
+            if (atrasos.length < AMOSTRA_MINIMA_MEDIANA) {
+                return null;
+            }
+
+            return Math.round(calcularMediana(atrasos));
+        }
+
+        function calcularMediana(valores) {
+            if (!valores || valores.length === 0) return null;
+
+            const ordenados = [...valores].sort((a, b) => a - b);
+            const meio = Math.floor(ordenados.length / 2);
+
+            if (ordenados.length % 2 === 1) {
+                return ordenados[meio];
+            }
+
+            return (ordenados[meio - 1] + ordenados[meio]) / 2;
+        }
+
         function obterHojeSemHorario() {
             const hoje = new Date();
             return new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
@@ -1061,26 +1198,49 @@ Veja o arquivo LICENSE para mais detalhes.
             return `${dia}/${mes}/${ano}`;
         }
 
-        function resolverDataAtendimento(dataAtendimentoRaw, carimboRaw) {
+        function resolverDataAtendimento(dataAtendimentoRaw, carimboRaw, contextoMediana) {
             const dataAtendimento = parseDataBrasileira(dataAtendimentoRaw);
 
             if (dataDentroDoIntervalo(dataAtendimento)) {
                 return {
                     dataStr: formatarDataDashboard(dataAtendimento),
-                    origem: "DATA_ATENDIMENTO"
+                    origem: "DATA_ATENDIMENTO",
+                    medianaDias: null
                 };
             }
 
             const dataCarimbo = parseDataBrasileira(carimboRaw);
 
-            if (dataDentroDoIntervalo(dataCarimbo)) {
-                return {
-                    dataStr: formatarDataDashboard(dataCarimbo),
-                    origem: "CARIMBO"
-                };
+            if (!dataDentroDoIntervalo(dataCarimbo)) {
+                return null;
             }
 
-            return null;
+            // Regra conservadora:
+            // só estima quando a Data de Atendimento foi preenchida, mas foi rejeitada pela validação.
+            // Se a Data de Atendimento estiver vazia, mantém o fallback direto para o Carimbo.
+            const atendimentoFoiPreenchido = String(dataAtendimentoRaw || "").trim() !== "";
+
+            if (atendimentoFoiPreenchido) {
+                const medianaDias = calcularMedianaAtrasoPorCarimbo(dataCarimbo, contextoMediana);
+
+                if (medianaDias !== null) {
+                    const dataEstimada = adicionarDias(dataCarimbo, -medianaDias);
+
+                    if (dataDentroDoIntervalo(dataEstimada)) {
+                        return {
+                            dataStr: formatarDataDashboard(dataEstimada),
+                            origem: "ESTIMADA_MEDIANA",
+                            medianaDias: medianaDias
+                        };
+                    }
+                }
+            }
+
+            return {
+                dataStr: formatarDataDashboard(dataCarimbo),
+                origem: "CARIMBO",
+                medianaDias: null
+            };
         }
 
         function extractDateString(raw) {
