@@ -64,15 +64,14 @@ Veja o arquivo LICENSE para mais detalhes.
                 <button 
                     id="btn-toggle-estimadas" 
                     class="hidden icon-toggle-btn p-2 bg-blue-800 hover:bg-blue-700 text-blue-200 hover:text-white rounded transition shadow-inner cursor-pointer" 
-                    title="Incluir ou remover datas estimadas dos indicadores"
-                    aria-label="Datas estimadas"
+                    title="Informações sobre datas estimadas"
+                    aria-label="Informações sobre datas estimadas"
                     aria-pressed="true"
                 >
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15h.01M16 15h.01M8 15h.01"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 100 20 10 10 0 000-20z"></path>
                     </svg>
-                    <span class="icon-toggle-label text-xs font-semibold">Datas estimadas</span>
                 </button>
                 <button 
                     id="btn-toggle-labels" 
@@ -85,11 +84,49 @@ Veja o arquivo LICENSE para mais detalhes.
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
-                    <span class="icon-toggle-label text-xs font-semibold">Valores</span>
                 </button>
             </div>
         </div>
     </header>
+
+    <div id="modal-estimadas" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-estimadas-title">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 id="modal-estimadas-title" class="modal-title">Datas estimadas</h2>
+
+                <button id="btn-modal-fechar-x" class="modal-close" aria-label="Fechar modal">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <p class="modal-text">
+                Alguns registros tinham a Data de Atendimento inválida. Para manter a linha do tempo consistente,
+                o sistema estimou uma data provável usando o histórico de atraso entre o atendimento e o envio do formulário.
+            </p>
+
+            <div class="modal-status-box">
+                <div class="modal-status-line">
+                    <span>Registros com datas estimadas</span>
+                    <strong id="modal-estimadas-total">0</strong>
+                </div>
+                <div class="modal-status-line mt-2">
+                    <span>Status atual</span>
+                    <strong id="modal-estimadas-status">Incluídos</strong>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button id="btn-modal-toggle-estimadas" class="modal-btn-primary">
+                    Ocultar estimadas
+                </button>
+                <button id="btn-modal-fechar" class="modal-btn-secondary">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div id="empty-state" class="flex flex-col items-center justify-center mt-32">
         <div id="empty-state-icon">
@@ -119,17 +156,17 @@ Veja o arquivo LICENSE para mais detalhes.
 
                 <p class="quick-tip-item">
                     <svg class="quick-tip-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15h.01M16 15h.01M8 15h.01"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 100 20 10 10 0 000-20z"></path>
                     </svg>
-                    <span><strong>Datas estimadas:</strong> o botão com ícone de calendário inclui ou remove registros estimados.</span>
+                    <span><strong>Datas estimadas:</strong> o botão com ícone de informação explica os registros estimados e permite incluí-los ou removê-los.</span>
                 </p>
 
                 <p class="quick-tip-item">
                     <svg class="quick-tip-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                     </svg>
-                    <span><strong>Gere relatórios:</strong> clique com o botão direito no gráfico e salve como imagem.</span>
+                    <span><strong>Gerar relatórios:</strong> clique com o botão direito no gráfico e salve como imagem.</span>
                 </p>
 
             </div>
@@ -186,7 +223,7 @@ Veja o arquivo LICENSE para mais detalhes.
             </section>
 
             <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 mb-8">
-                <h3 class="text-md font-bold text-slate-700 mb-4">Evolução Histórica de Atendimentos</h3>
+                <h3 class="text-md font-bold text-slate-700 mb-4">Histórico da Quantidade de Pessoas Atendidas</h3>
                 <div class="relative h-80 w-full flex flex-col justify-center">
                     <canvas id="chartEvolucao"></canvas>
                     <div id="empty-chartEvolucao" class="hidden absolute inset-0 flex-col items-center justify-center bg-slate-50/80 rounded-lg border border-dashed border-slate-200 z-10">
@@ -242,7 +279,7 @@ Veja o arquivo LICENSE para mais detalhes.
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col h-full">
                     <h3 class="text-md font-bold text-slate-700 mb-4 flex-shrink-0">Distribuição de Gênero</h3>
                     <div class="flex-grow w-full flex flex-col items-center justify-center">
-                        <div class="relative w-full max-w-[240px] h-[240px]">
+                        <div class="relative chart-genero-box">
                             <canvas id="chartGenero"></canvas>
                             <div id="empty-chartGenero" class="hidden absolute inset-0 flex-col items-center justify-center bg-slate-50/80 rounded-lg border border-dashed border-slate-200 z-10"><span class="text-xs text-slate-400 font-medium">Sem dados</span></div>
                         </div>
@@ -408,10 +445,35 @@ Veja o arquivo LICENSE para mais detalhes.
         // Botão de Toggle de Datas Estimadas por Mediana
         const btnToggleEstimadas = document.getElementById('btn-toggle-estimadas');
         if (btnToggleEstimadas) {
-            btnToggleEstimadas.addEventListener('click', () => {
+            btnToggleEstimadas.addEventListener('click', abrirModalEstimadas);
+        }
+
+        const btnModalToggleEstimadas = document.getElementById('btn-modal-toggle-estimadas');
+        if (btnModalToggleEstimadas) {
+            btnModalToggleEstimadas.addEventListener('click', () => {
                 mostrarDatasEstimadas = !mostrarDatasEstimadas;
                 atualizarBotaoEstimadas();
+                atualizarModalEstimadas();
                 renderizarDashboard();
+            });
+        }
+
+        const btnModalFechar = document.getElementById('btn-modal-fechar');
+        if (btnModalFechar) {
+            btnModalFechar.addEventListener('click', fecharModalEstimadas);
+        }
+
+        const btnModalFecharX = document.getElementById('btn-modal-fechar-x');
+        if (btnModalFecharX) {
+            btnModalFecharX.addEventListener('click', fecharModalEstimadas);
+        }
+
+        const modalEstimadas = document.getElementById('modal-estimadas');
+        if (modalEstimadas) {
+            modalEstimadas.addEventListener('click', (event) => {
+                if (event.target === modalEstimadas) {
+                    fecharModalEstimadas();
+                }
             });
         }
 
@@ -1029,6 +1091,48 @@ Veja o arquivo LICENSE para mais detalhes.
         // 7. FUNÇÕES AUXILIARES E CONSTRUTORES (UTILS)
         // ==========================================
 
+        function contarRegistrosEstimados() {
+            return new Set(
+                globalAtendimentos
+                    .filter(d => d.origemData === "ESTIMADA_MEDIANA")
+                    .map(d => d.idLinha)
+            ).size;
+        }
+
+        function abrirModalEstimadas() {
+            atualizarModalEstimadas();
+
+            const modalEstimadas = document.getElementById('modal-estimadas');
+            if (!modalEstimadas) return;
+
+            modalEstimadas.classList.remove('hidden');
+        }
+
+        function fecharModalEstimadas() {
+            const modalEstimadas = document.getElementById('modal-estimadas');
+            if (!modalEstimadas) return;
+
+            modalEstimadas.classList.add('hidden');
+        }
+
+        function atualizarModalEstimadas() {
+            const totalEstimadas = document.getElementById('modal-estimadas-total');
+            const statusEstimadas = document.getElementById('modal-estimadas-status');
+            const btnModalToggle = document.getElementById('btn-modal-toggle-estimadas');
+
+            if (totalEstimadas) {
+                totalEstimadas.innerText = contarRegistrosEstimados();
+            }
+
+            if (statusEstimadas) {
+                statusEstimadas.innerText = mostrarDatasEstimadas ? "Incluídos" : "Ocultos";
+            }
+
+            if (btnModalToggle) {
+                btnModalToggle.innerText = mostrarDatasEstimadas ? "Ocultar estimadas" : "Exibir estimadas";
+            }
+        }
+
         function atualizarBotaoEstimadas() {
             const btnToggleEstimadas = document.getElementById('btn-toggle-estimadas');
             if (!btnToggleEstimadas) return;
@@ -1102,16 +1206,65 @@ Veja o arquivo LICENSE para mais detalhes.
 
         function criarGraficoPizza(canvasId, labels, data, colors) {
             const ctx = document.getElementById(canvasId).getContext('2d');
-            if(chartInstances[canvasId]) chartInstances[canvasId].destroy();
+
+            if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
+
             chartInstances[canvasId] = new Chart(ctx, {
                 type: 'doughnut',
-                data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] },
-                options: { 
-                    animation: false, responsive: true, maintainAspectRatio: false, cutout: '60%', layout: { padding: 20 },
-                    plugins: { 
-                        legend: { position: 'bottom' },
-                        datalabels: { color: '#ffffff', anchor: 'center', align: 'center', font: { weight: 'bold', size: 14 } }
-                    } 
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    animation: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '58%',
+                    layout: {
+                        padding: 12
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((acc, valor) => acc + valor, 0);
+                                    const valor = context.raw || 0;
+                                    const percentual = total > 0 ? ((valor / total) * 100).toFixed(1) : 0;
+
+                                    return `${context.label}: ${valor} (${percentual}%)`;
+                                }
+                            }
+                        },
+                        datalabels: {
+                            color: '#ffffff',
+                            anchor: 'center',
+                            align: 'center',
+                            font: {
+                                weight: 'bold',
+                                size: 13
+                            },
+                            formatter: function(value, context) {
+                                const total = context.dataset.data.reduce((acc, valor) => acc + valor, 0);
+                                const percentual = total > 0 ? (value / total) * 100 : 0;
+
+                                return percentual >= 5 ? `${Math.round(percentual)}%` : '';
+                            },
+                            display: function(context) {
+                                const value = context.dataset.data[context.dataIndex];
+                                const total = context.dataset.data.reduce((acc, valor) => acc + valor, 0);
+                                const percentual = total > 0 ? (value / total) * 100 : 0;
+
+                                return percentual >= 5;
+                            }
+                        }
+                    }
                 }
             });
         }

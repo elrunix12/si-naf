@@ -57,18 +57,23 @@ No canto superior direito, há um botão com ícone de **olho**. Ele controla a 
 * Quando o botão está **azul**, os valores ficam ocultos.
 * Quando o botão está **amarelo**, os valores aparecem nos gráficos.
 
-Ao passar o mouse sobre o botão, ele se expande e mostra o texto **"Valores"**.
+Esse botão funciona como um interruptor visual: ao clicar, os valores são exibidos ou ocultados diretamente nos gráficos.
 
 ### Botão "Datas estimadas"
 
-Quando o Dashboard identifica registros com datas estimadas, aparece no canto superior direito um botão com ícone de calendário.
+Quando o Dashboard identifica registros com datas estimadas, aparece no canto superior direito um botão com ícone de **informação**.
 
-Esse botão permite incluir ou remover temporariamente os registros com datas estimadas dos indicadores e gráficos.
+Esse botão abre uma janela explicativa sobre as datas estimadas. Nessa janela, o usuário pode verificar:
+
+* o que são datas estimadas;
+* quantos registros foram estimados;
+* se esses registros estão incluídos ou ocultos nos indicadores;
+* a opção para ocultar ou exibir esses registros no Dashboard.
+
+A cor do botão indica o estado atual:
 
 * Quando o botão está **amarelo**, as datas estimadas estão incluídas no Dashboard.
 * Quando o botão está **azul**, as datas estimadas estão ocultas.
-
-Ao passar o mouse sobre o botão, ele se expande e mostra o texto **"Datas estimadas"**.
 
 Esse recurso ajuda a comparar os resultados com e sem registros estimados.
 
