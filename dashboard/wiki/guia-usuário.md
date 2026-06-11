@@ -50,9 +50,32 @@ Na aba **Geral**, você encontrará quatro cartões principais:
 
 O Dashboard não é apenas visual; você pode interagir com os elementos:
 
-### Mostrar/Ocultar Números
+### Botão "Valores"
 
-No canto superior direito, há um ícone de **Olho (👁️)**. Ao clicar nele, o sistema exibe ou oculta os valores exatos em cima de cada barra nos gráficos.
+No canto superior direito, há um botão com ícone de **olho**. Ele controla a exibição dos valores numéricos nos gráficos.
+
+* Quando o botão está **azul**, os valores ficam ocultos.
+* Quando o botão está **amarelo**, os valores aparecem nos gráficos.
+
+Esse botão funciona como um interruptor visual: ao clicar, os valores são exibidos ou ocultados diretamente nos gráficos.
+
+### Botão "Datas estimadas"
+
+Quando o Dashboard identifica registros com datas estimadas, aparece no canto superior direito um botão com ícone de **informação**.
+
+Esse botão abre uma janela explicativa sobre as datas estimadas. Nessa janela, o usuário pode verificar:
+
+* o que são datas estimadas;
+* quantos registros foram estimados;
+* se esses registros estão incluídos ou ocultos nos indicadores;
+* a opção para ocultar ou exibir esses registros no Dashboard.
+
+A cor do botão indica o estado atual:
+
+* Quando o botão está **amarelo**, as datas estimadas estão incluídas no Dashboard.
+* Quando o botão está **azul**, as datas estimadas estão ocultas.
+
+Esse recurso ajuda a comparar os resultados com e sem registros estimados.
 
 ### Detalhar "Outros" (Drill-down)
 
@@ -79,3 +102,5 @@ Nos gráficos de pizza ou barras, você pode clicar nos itens da **Legenda** par
 * **"O gráfico aparece escrito 'Sem dados'":** Isso significa que a combinação de filtros que você selecionou (Ex: Ano 2026 + Mês Janeiro + Cidade X) não possui nenhum atendimento registrado na planilha.
 * **"Os números parecem errados":** Verifique se o filtro de **Município** ou **Mês** não ficou selecionado acidentalmente no topo da página.
 * **"A página está em branco":** Tente atualizar (F5). Se o problema persistir, a planilha de dados pode ter sido movida ou renomeada.
+* **"Apareceu o botão de Datas estimadas":** Isso significa que alguns registros tinham a Data de Atendimento inválida e o sistema estimou uma data provável para eles. Você pode clicar no botão para incluir ou remover esses registros dos gráficos e indicadores.
+* **"Os números mudaram quando cliquei em Datas estimadas":** Isso é esperado. Quando as datas estimadas são ocultadas, o Dashboard recalcula os KPIs e gráficos sem esses registros.
