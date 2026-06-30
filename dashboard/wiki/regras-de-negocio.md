@@ -388,6 +388,18 @@ const dateParsed = dataResolvida.dataStr;
 7. Se o Carimbo também for inválido, ignora a linha.
 ```
 
+### 5.9 Trava Data de Carimbo
+
+O Sistema pressupõe que você esteja usando o Google Forms para registrar o atendimento. Por isso, linhas que não contenham o Carimbo não são reconhecidas. Caso você use apenas colunas com Data de Atendimento, altere a seguinte linha para `FALSE`:
+
+```
+// true = Exige que a linha tenha um carimbo válido do Forms para ser lida.
+// false = Funciona como o sistema antigo (lê apenas pela Data de Atendimento).
+const EXIGIR_CARIMBO = true;
+```
+
+**ATENÇÃO:** Caso você não use o Google Forms ou Data de Carimbo, a aproximação por mediana **NÃO** irá funcionar, pois ela precisa de uma data de referência para fazer a estimativa.
+
 ## 6. Cálculo da Taxa de Retorno (Fidelização)
 
 A Taxa de Retorno, visível na aba "Geral", mede quantos contribuintes usaram o NAF mais de uma vez em dias distintos.

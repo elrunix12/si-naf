@@ -371,6 +371,11 @@ Veja o arquivo LICENSE para mais detalhes.
         };
 
         // Variáveis Globais de Estado
+
+        // true = Exige que a linha tenha um carimbo válido do Forms para ser lida.
+        // false = Funciona como o sistema antigo (lê apenas pela Data de Atendimento).
+        const EXIGIR_CARIMBO = true;
+
         let globalAtendimentos = []; // Armazena a base de dados tratada ("Livro Diário")
         let chartInstances = {};     // Guarda referências dos gráficos do Chart.js para destruí-los/atualizá-los
         let currentTab = 'geral';    // Aba ativa no momento
@@ -568,6 +573,18 @@ Veja o arquivo LICENSE para mais detalhes.
 
                 const dataAtendimentoStr = keyAtendimento ? String(row[keyAtendimento] || "").trim() : "";
                 const carimboStr = keyCarimbo ? String(row[keyCarimbo] || "").trim() : "";
+
+                // --- INÍCIO DA NOVA TRAVA DE SEGURANÇA ---
+                if (EXIGIR_CARIMBO) {
+                    // Tenta converter o carimbo em uma data válida usando a sua função padrão
+                    const carimboValido = parseDataBrasileira(carimboStr);
+
+                    // Se o carimbo não existir ou estiver fora do intervalo aceito (muito antigo ou no futuro)
+                    if (!dataDentroDoIntervalo(carimboValido)) {
+                        return; // O 'return' aqui faz o código abortar esta linha e pular para a próxima!
+                    }
+                }
+                // --- FIM DA NOVA TRAVA DE SEGURANÇA ---
 
                 const dataResolvida = resolverDataAtendimento(dataAtendimentoStr, carimboStr, contextoMediana);
 
