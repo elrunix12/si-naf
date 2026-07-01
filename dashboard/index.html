@@ -370,6 +370,19 @@ Veja o arquivo LICENSE para mais detalhes.
             "Outros": [] // Tratado de forma dinâmica mais abaixo
         };
 
+        // Lista de variações conhecidas que diferentes versões do formulário usam
+        // como gatilho para o campo de texto livre "especifique" (ex: formulário A usa "Outro",
+        // formulário B usa "Outros"). Esses termos NÃO representam um serviço em si,
+        // então não devem virar uma categoria/barra própria no gráfico.
+        const MARCADORES_GENERICOS_OUTRO = ["OUTRO", "OUTROS"];
+
+        // Verifica se um termo da múltipla escolha é apenas o marcador genérico de "outro",
+        // ignorando pontuação comum no final (: ; . ,) que pode variar entre formulários.
+        function isMarcadorGenerico(termoOriginal) {
+            const limpo = termoOriginal.replace(/[:;.,]+$/, "").trim();
+            return MARCADORES_GENERICOS_OUTRO.includes(limpo);
+        }
+
         // Variáveis Globais de Estado
 
         // true = Exige que a linha tenha um carimbo válido do Forms para ser lida.
@@ -662,9 +675,13 @@ Veja o arquivo LICENSE para mais detalhes.
                         }
                     }
 
-                    // Se nenhuma categoria reconheceu esse termo, vai para Outros
+                    // Se nenhuma categoria reconheceu esse termo, vai para Outros —
+                    // exceto se for apenas o marcador genérico "Outro/Outros" do formulário,
+                    // que não carrega informação própria (o conteúdo real vem do campo
+                    // "especificar outro", tratado separadamente logo abaixo).
                     if (!casou) {
-                        serviçosDestaLinha.push({ categoria: "Outros", subcategoria: "NÃO ESPECIFICADO" });
+                        if (isMarcadorGenerico(termo)) continue;
+                        serviçosDestaLinha.push({ categoria: "Outros", subcategoria: termo });
                     }
                 }
 
