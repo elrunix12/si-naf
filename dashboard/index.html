@@ -1485,16 +1485,20 @@ Veja o arquivo LICENSE para mais detalhes.
 
         function resolverDataAtendimento(dataAtendimentoRaw, carimboRaw, contextoMediana) {
             const dataAtendimento = parseDataBrasileira(dataAtendimentoRaw);
+            const dataCarimbo = parseDataBrasileira(carimboRaw); // agora calculado logo no início
 
-            if (dataDentroDoIntervalo(dataAtendimento)) {
+            // Nova regra: Data de Atendimento não pode ser posterior ao Carimbo,
+            // quando o Carimbo existir e for uma data válida.
+            const atendimentoPosteriorAoCarimbo =
+                dataDentroDoIntervalo(dataCarimbo) && dataAtendimento && dataAtendimento > dataCarimbo;
+
+            if (dataDentroDoIntervalo(dataAtendimento) && !atendimentoPosteriorAoCarimbo) {
                 return {
                     dataStr: formatarDataDashboard(dataAtendimento),
                     origem: "DATA_ATENDIMENTO",
                     medianaDias: null
                 };
             }
-
-            const dataCarimbo = parseDataBrasileira(carimboRaw);
 
             if (!dataDentroDoIntervalo(dataCarimbo)) {
                 return null;

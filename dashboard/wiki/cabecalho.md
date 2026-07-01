@@ -43,7 +43,7 @@ Esta é a lista de termos que o sistema procura automaticamente no cabeçalho da
 | `outroKey` | `respondeu outro` | Pega textos livres para detalhar outros serviços. | *Se **respondeu outro**, especifique:* |
 | `sexoKey` | `sexo` ou `genero` | Monta o gráfico de pizza de perfil do contribuinte. | *Qual o seu **sexo** / **gênero**?* |
 | `idadeKey` | `idade` | Calcula a média e as faixas etárias. | *Qual a sua **idade**?* |
-| `conclusivoKey` | `conclusivo` | Filtra a taxa de sucesso dos atendimentos. | *O atendimento prestado foi **conclusivo**?* |
+| `conclusivoKey` | `conclusivo` | Permite filtrar os gráficos pelo status de conclusão do atendimento. | *O atendimento prestado foi **conclusivo**?* |
 | `folhasKey` | `folhas` | Soma o indicador geral de volume de impressões. | *Se houver, quantas **folhas** foram impressas?* |
 | `municipioKey` | `municipio` | Monta o gráfico de alcance geográfico. | *Qual o **município** de residência?* |
 | `tipoUserKey` | `tipo de usuario` | Permite filtrar entre Pessoa Física (PF) e Jurídica (PJ). | ***Tipo de usuário** dos serviços (PF ou PJ)?* |
