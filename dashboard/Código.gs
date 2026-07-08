@@ -44,7 +44,7 @@ function obterDadosPlanilha() {
   const saltHash = propriedades.getProperty('SALT_HASH_CPF') || "Chave_Padrao_Temporaria_NAF_2026";
   let registrosConsolidados = [];
 
-  const regexProibido = /\b(cpf|cnpj|contribuinte|telefone|celular|email|e-mail|rg|identidade|nascimento|endereco|senha)\b/;
+  const regexProibido = /\b(cpf|cnpj|contribuinte|telefone|celular|email|e-mail|rg|identidade|nascimento|endereco|senha|nome)\b/;
 
   // 2. Loop de Processamento por Planilha
   fontes.forEach((fonte) => {
@@ -55,10 +55,10 @@ function obterDadosPlanilha() {
       if (!sheet) return;
 
       const values = sheet.getDataRange().getValues();
-      if (values.length <= 1) return; 
+      if (values.length <= 1) return;
 
-      const cabecalhoLocal = values[0]; 
-      const linhasDeDados = values.slice(1); 
+      const cabecalhoLocal = values[0];
+      const linhasDeDados = values.slice(1);
 
       // ==========================================
       // ESTRATÉGIA SEGURA: MAPEAMENTO DE INJEÇÃO
@@ -69,7 +69,7 @@ function obterDadosPlanilha() {
 
       cabecalhoLocal.forEach((nomeColuna, i) => {
         if (!nomeColuna) return;
-        
+
         const nomeOriginal = nomeColuna.toString();
         const nomeTratado = nomeOriginal.toLowerCase().trim()
           .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -80,7 +80,7 @@ function obterDadosPlanilha() {
           return;
         }
 
-        // Se não for uma coluna proibida pelo Firewall, memoriza para leitura em lote
+        // Se não for uma coluna proibida pelo Filtro de Colunas Sensíveis, memoriza para leitura em lote
         if (!regexProibido.test(nomeTratado)) {
           colunasPermitidas.push({
             nomeOriginal: nomeOriginal,
@@ -97,7 +97,7 @@ function obterDadosPlanilha() {
         if (indiceCpf !== -1) {
           const valorCpf = linha[indiceCpf];
           const cpfLimpo = String(valorCpf || "").replace(/\D/g, '').padStart(11, '0');
-          
+
           if (cpfLimpo.length === 11) {
             registro['usuarioHash'] = gerarHashAnonimo(cpfLimpo, saltHash);
           }
@@ -106,7 +106,7 @@ function obterDadosPlanilha() {
         // Processa apenas as colunas previamente aprovadas pelo mapa
         colunasPermitidas.forEach((col) => {
           const valor = linha[col.index];
-          
+
           if (valor instanceof Date) {
             registro[col.nomeOriginal] = valor.toLocaleDateString('pt-BR');
           } else {

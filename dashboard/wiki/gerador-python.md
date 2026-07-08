@@ -1,78 +1,96 @@
-# 📖 Script Gerador de Dados Sintéticos (Python)
+# Script Gerador de Dados Sintéticos e Auditoria (Python)
 
-O arquivo `gerador-csv.py` é uma ferramenta de suporte desenvolvida para criar bases de dados massivas e realistas. Ele permite testar a estabilidade do Dashboard, o desmembramento de serviços e as funções de limpeza de dados antes da aplicação em produção.
-
-
+O arquivo `gerador-csv.py` é uma ferramenta desenvolvida para criar bases de dados sintéticas estruturadas para o Dashboard NAF. O script simula entradas do Google Forms, gera casos de borda (edge cases) para validação da limpeza de dados e cria um log de auditoria com os KPIs da base gerada.
 
 ## 1. Objetivo do Script
 
-Para validar se os gráficos e filtros funcionam corretamente com milhares de registros, utilizamos dados sintéticos. O script simula o comportamento real de preenchimento do Google Forms, incluindo:
+O gerador é utilizado para validar o comportamento do Dashboard com grandes volumes de dados. Ele aplica regras para testar:
 
-* **Múltiplas Escolhas:** Atendimentos com um ou mais serviços marcados.
-* **Dados Incompletos:** Datas de atendimento vazias e idades não informadas para testar as lógicas de *fallback*.
-* **Sujeira no campo "Outros":** Inserção de termos aleatórios para validar a função de padronização.
-
-
+* **Desmembramento de Serviços:** Múltiplos serviços selecionados em um único atendimento.
+* **Higienização de Dados:** Datas inválidas, idades vazias e inconsistências textuais no campo "Outros".
+* **Métricas de Recorrência:** Simulação estruturada de CPFs repetidos para validar o cálculo da taxa de retorno.
 
 ## 2. Configurações Básicas
 
-No topo do arquivo, você encontrará as variáveis de controle:
+No início do script, as variáveis definem o volume de dados e a quantidade de arquivos a serem gerados:
 
 ```python
-NUM_LINHAS = 10000            # Quantidade de atendimentos a gerar
-ARQUIVO_SAIDA = 'dados_naf.csv' # Nome do arquivo final
+QTD_ARQUIVOS = 4      # Quantidade de arquivos CSV a serem gerados
+NUM_LINHAS = 5000     # Quantidade de atendimentos por arquivo
+PASTA_TESTE = 'test'  # Diretório principal de saída
 
 ```
 
+Os arquivos `.csv` gerados receberão numeração automática no nome (ex: `dados_naf_auditoria_1.csv`, `dados_naf_auditoria_2.csv`).
+
+## 3. Lógicas de Simulação
+
+O script aplica regras estatísticas para refletir cenários de produção:
+
+### Regras Temporais e Datas
+
+* **Período Base:** Os atendimentos são gerados aleatoriamente entre 1 de janeiro de 2024 e 1 de maio de 2026.
 
 
-## 3. Lógicas de Simulação Realista
-
-O script não gera apenas dados aleatórios, ele segue regras de negócio específicas do NAF:
-
-### 🕒 Inteligência Temporal
-
-* **Carimbo de data/hora:** Gerado aleatoriamente entre 2024 e 2026.
-* **Data de Atendimento:** Em 10% dos casos, o script deixa este campo vazio para forçar o Dashboard a usar o Carimbo de data/hora como plano B.
-
-### 📊 Serviços e "Outros"
-
-* **Pesos de Probabilidade:** 70% dos atendimentos simulados possuem apenas 1 serviço, enquanto 30% simulam múltiplas escolhas (2 ou 3 serviços).
-* **Campo "Outros":** Em 15% dos casos, o serviço "Outros" é adicionado, sorteando um texto da lista `TEXTOS_OUTROS` (ex: "recuperar senha gov", "malha fina").
-
-### 🧹 Teste de Resiliência (Idade e Folhas)
-
-* O script insere intencionalmente textos como "não informou" ou campos vazios na coluna de **IDADE** em 5% dos casos.
-* Isso serve para garantir que o Dashboard não trave ao tentar calcular a média de idade com valores não numéricos.
+* **Inconsistências:** Em 5% dos registros, o carimbo de data/hora é omitido. Em outros 10% dos registros (cumulativamente, até 15% do total), são inseridas datas de atendimento inválidas (ex: "31/02/2026", "ErroDigitação") para validar o tratamento de erros do Dashboard. Essa substituição só ocorre para atendimentos com carimbo posterior aos primeiros 30 dias do período simulado, garantindo que já exista histórico suficiente para a estimativa por mediana.
 
 
 
-## 4. Como Executar
+### Distribuição de Serviços
 
-1. Certifique-se de ter o Python instalado em sua máquina.
-2. Abra o terminal na pasta do projeto.
-3. Execute o comando:
+* **Probabilidades:** Há 75% de chance de o atendimento ter 1 serviço, 20% de ter 2 serviços e 5% de não possuir serviço listado (vazio ou "Outros").
+
+
+* **Campo "Outros":** Quando aplicável, preenche o campo com termos predefinidos (ex: "malha fina", "recuperar senha gov") para testar a categorização textual.
+
+
+
+### Usuários e Inconsistências
+
+* **Recorrência:** O script utiliza um conjunto restrito de 500 CPFs predefinidos para gerar retornos e testar a lógica de clientes recorrentes do dashboard. Esse pool é gerado uma única vez e compartilhado entre todos os arquivos CSV — por isso a mesma pessoa pode aparecer em arquivos diferentes, o que permite testar a detecção de recorrência entre fontes/abas distintas, não só dentro de um único arquivo.
+
+
+* **Idade e Gênero:** Em 5% dos casos, a idade fica em branco. Nos demais casos, o script sorteia com peso igual os valores exatos nos limites de cada faixa etária (25, 26, 40, 41, 60, 61), para validar as bordas de `categorizarIdade()`, além de idades aleatórias entre 18 e 80 anos. Variáveis de sexo misturam padrões de preenchimento em maiúsculas, minúsculas ou vazios.
+
+
+
+## 4. Como Executar e Saídas Geradas
+
+1. Certifique-se de ter o Python instalado.
+
+
+2. Abra o terminal na raiz do projeto e execute:
+
 ```bash
 python gerador-csv.py
 
 ```
 
-
-4. O arquivo `.csv` será gerado na mesma pasta, pronto para ser importado no Google Sheets.
+3. O script criará (se não existirem) os diretórios correspondentes e produzirá as seguintes saídas:
+* **Bases de Dados:** Vários arquivos `.csv` (conforme definido na configuração) serão salvos na pasta `test/`.
+* **Gabarito de Auditoria (Log):** Um único arquivo `.txt` será salvo na subpasta `test/log/`. Este documento contém o Hash SHA-256 de cada CSV, as métricas individuais de cada arquivo e um relatório consolidado geral.
 
 
 
 ## 5. Importação para o Dashboard
 
-Para testar os dados gerados no seu sistema:
+Para testar os dados no sistema atual:
 
 1. Abra uma planilha do Google.
-2. Vá em **Arquivo > Importar > Fazer upload** e selecione o arquivo gerado.
+
+
+2. Acesse **Arquivo > Importar > Fazer upload** e selecione um dos arquivos gerados (ex: `dados_naf_auditoria_1.csv`) na pasta `test`.
+
+
 3. Escolha a opção **"Substituir planilha atual"**.
-4. Copie o ID desta nova planilha e cole nas **Propriedades do Script** do seu Dashboard.
+
+
+4. Copie o ID da planilha na URL e configure-o nas propriedades ou scripts do seu Dashboard.
+
+**Testando múltiplas fontes:** como o pool de CPFs recorrentes é compartilhado entre os arquivos gerados, vale a pena importar `dados_naf_auditoria_1.csv` e `dados_naf_auditoria_2.csv` como duas abas ou fontes diferentes (`PLANILHA_ID_1`/`TAB_NOME_1` e `PLANILHA_ID_2`/`TAB_NOME_2`), conforme descrito em [Consolidação de Múltiplas Abas](multiplas-abas.md). Nesse caso, o **"RELATÓRIO CONSOLIDADO GERAL"** do log é o gabarito correto a usar — ele já soma os dois arquivos e calcula a recorrência considerando pessoas que aparecem em ambos.
 
 
 
-## 💡 Dica para Desenvolvedores
+## 6. Manutenção de Categorias
 
-Ao adicionar um novo serviço oficial ao Google Forms, lembre-se de incluí-lo também na lista `TIPOS_ATENDIMENTO_OFICIAIS` dentro deste script Python. Isso garante que seus testes de estresse sempre reflitam a estrutura atual do formulário.
+Os serviços estão organizados no dicionário `CATEGORIAS_DICIONARIO` dentro do script. Caso novos serviços ou categorias sejam adicionados ao formulário oficial do NAF, este dicionário deve ser atualizado para garantir a equivalência durante os testes e a correta geração do gabarito de auditoria.

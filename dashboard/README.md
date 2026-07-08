@@ -34,8 +34,8 @@ O projeto foi construído com foco em segurança e estabilidade, utilizando **ze
 ## 🚀 Funcionalidades Principais
 
 * **Consolidação Multi-Planilhas:** Une dados de múltiplos formulários automaticamente.
-* **Firewall LGPD:** Bloqueia dados sensíveis, como Nome e CPF, no servidor antes do envio ao navegador.
-* **Anonimização de CPF:** Utiliza hash para permitir análise de retorno dos contribuintes sem expor o CPF original.
+* **Filtro de Colunas Sensíveis:** Bloqueia colunas identificadas como sensíveis, como Nome, CPF, telefone e e-mail, no servidor antes do envio ao navegador.
+* **Pseudonimização de CPF:** Utiliza hash com salt para permitir análise de retorno dos contribuintes sem expor o CPF original em texto puro.
 * **Mapeamento Inteligente:** Localiza dados por palavras-chave, ignorando a ordem das colunas na planilha.
 * **Validação de Datas:** Rejeita datas inexistentes, futuras ou anteriores ao limite mínimo configurado.
 * **Estimativa por Mediana:** Quando a Data de Atendimento está inválida, o sistema pode estimar uma data provável com base no histórico de atraso entre atendimento e lançamento no formulário.
@@ -58,7 +58,7 @@ No portal GAS, configure as IDs das suas planilhas em **Configurações do Proje
 * `TAB_NOME_1`: nome da aba específica, se aplicável.
 * `PLANILHA_ID_2` / `TAB_NOME_2`: usados caso exista uma segunda fonte de dados.
 * `PLANILHA_ID_3` / `TAB_NOME_3`: usados caso exista uma terceira fonte de dados.
-* `SALT_HASH_CPF`: chave usada para gerar o hash anonimizado dos CPFs.
+* `SALT_HASH_CPF`: chave usada para gerar o hash pseudonimizado dos CPFs.
 
 ## 📖 Documentação Técnica (Wiki)
 
@@ -71,15 +71,15 @@ Para garantir a manutenção de longo prazo e a escalabilidade do projeto, consu
 * **[Consolidação de Múltiplas Abas](wiki/multiplas-abas.md)** — Como somar dados de diferentes páginas de um mesmo arquivo.
 * **[Guia de Atualização (Deploy)](wiki/atualizaçao.md)** — Como publicar novas versões do código sem quebrar o link público.
 * **[Guia Gerador Python](wiki/gerador-python.md)** — Tutorial de como usar o `gerador-csv.py`.
-* **[Firewall](wiki/firewall.md)** — Bloqueio de palavras-chave e remoção de dados sensíveis no Backend.
+* **[Filtro de Colunas Sensíveis](wiki/filtro-colunas.md)** — Bloqueio de palavras-chave e remoção de dados sensíveis no Backend.
 * **[Regras de Negócio](wiki/regras-de-negocio.md)** — Documento com as travas lógicas do código, como validação de datas, estimativa por mediana, conversão de gêneros, faixas etárias, aglomeração do campo “Outros” e cálculo dos KPIs.
 
-## 🔒 Segurança e Privacidade (Privacy by Design)
+## 🔒 Segurança e Privacidade
 
-O sistema foi construído para ser resiliente a vazamentos de dados:
+O sistema adota medidas para reduzir a exposição de dados sensíveis:
 
 1. **Backend (GAS):** filtra e remove colunas de identificação pessoal, como Nome e CPF, antes da transmissão para o navegador.
-2. **Anonimização:** o CPF não é enviado ao frontend. Em seu lugar, o sistema utiliza um hash para permitir a análise de retorno dos contribuintes sem expor o dado original.
+2. **Pseudonimização:** o CPF não é enviado ao frontend em texto puro. Em seu lugar, o sistema utiliza um hash com salt para permitir a análise de retorno dos contribuintes sem expor o dado original diretamente. Como o CPF tem um espaço relativamente pequeno de combinações válidas, esse hash não deve ser tratado como irreversível caso o salt seja descoberto — por isso é importante configurar `SALT_HASH_CPF` com um valor próprio, em vez de manter o padrão definido no código.
 3. **Acesso:** o controle de acesso aos dados brutos permanece sob a gestão das permissões de compartilhamento do Google Drive do proprietário.
 4. **Dependências Locais:** o projeto não utiliza CDNs externas; bibliotecas, scripts e estilos são servidos localmente pelo Apps Script.
 

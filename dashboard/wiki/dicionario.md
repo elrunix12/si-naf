@@ -60,6 +60,20 @@ No Google Forms, se a pergunta "Tipo de Atendimento" for de múltipla escolha (c
 **Você não precisa se preocupar com isso no dicionário.**
 A lógica do Dashboard já está programada para separar essa célula por vírgulas em termos individuais e testar **cada termo separadamente** contra as chaves do seu dicionário. Se ele encontrar o texto do MEI em um termo e o texto do ITR em outro, ele computará +1 para "MEI e Simples Nacional" e +1 para "Imposto de Renda", desmembrando o atendimento perfeitamente nos gráficos.
 
+### ⚠️ Exceção: Textos do Dicionário com Vírgula Própria
+
+Duas opções oficiais do NAF têm vírgula dentro do próprio texto (ex: "...PORTADORES DE DEFICIÊNCIA FÍSICA, MENTAL OU VISUAL", em "Restituições e Isenções"). Como a vírgula também é o separador de múltipla escolha, isso causava um bug real: ao separar a célula por vírgulas, esses textos eram fatiados em pedaços — e cada pedaço, por ser um trecho do texto original, ainda batia com a mesma categoria (graças à comparação bidirecional da Seção 2). Resultado: um único atendimento marcado era contado 2 ou 3 vezes em vez de 1, inflando os números de "Restituições e Isenções" e "Previdência e eSocial" nos gráficos.
+
+**Isso já foi corrigido no código.** Antes de separar a célula por vírgula, o sistema primeiro varre o dicionário procurando textos completos que tenham vírgula própria e os extrai inteiros da célula. Só o que sobra depois disso é separado por vírgula normalmente.
+
+**Você não precisa fazer nada de especial ao cadastrar uma nova categoria com vírgula no texto** — a varredura é automática e cobre qualquer entrada do dicionário, atual ou futura. Esse bloco de verificação fica isolado, calculado uma única vez (fora do loop de linhas, por performance), logo depois da definição de `categoriasDicionario` no `index.html`.
+
+**Isso não afeta o campo "Especificar Outro".** Aquele campo nunca é separado por vírgula — o texto inteiro é tratado como uma resposta única. A consequência é diferente: se alguém digitar dois assuntos separados por vírgula ali (ex: "problema no CNPJ, dúvida sobre MEI"), os dois viram uma única entrada no drill-down de "Outros", categorizada pela primeira palavra-chave que bater — não é uma contagem a mais, é uma informação a menos.
+
+> **Por que a marcação "Outros" sozinha é ignorada:** quando o usuário marca apenas a caixa "Outros" na múltipla escolha, o Google Forms grava essa marcação genérica na própria coluna Tipo de Atendimento — mas o conteúdo real do serviço está na coluna Especificar Outro, tratada separadamente. Por isso o sistema descarta essa marcação genérica ao processar a múltipla escolha: se ela fosse contabilizada, o mesmo atendimento seria contado duas vezes (uma pela marcação genérica, outra pelo texto livre).
+
+> **O total de pessoas atendidas não muda:** mesmo quando uma linha gera várias entradas na Aba Operacional (uma para cada serviço marcado), o KPI de Total de Pessoas Atendidas conta cada linha da planilha uma única vez, independentemente de quantos serviços ela tenha gerado.
+
 ---
 
 ## 4. Como Adicionar uma Nova Categoria (Novo Guarda-chuva)
@@ -126,8 +140,9 @@ A categoria `"Outros": []` no final do dicionário **deve permanecer sempre vazi
 
 * **Drill-down (Detalhamento):** Na aba Operacional, ao clicar em **"Detalhar Outros"**, o sistema mostra exatamente o que os usuários digitaram na opção "Outros / Especifique" (mais os termos da múltipla escolha que não bateram com nenhuma categoria).
 
-### 🛠️ A Função `padronizarOutros()`
+* **Trava Final (Nenhum Serviço Reconhecido):** o rótulo `"NÃO ESPECIFICADO"` só aparece quando, ao mesmo tempo, (1) a coluna Tipo de Atendimento não contiver nenhum termo real — esteja vazia ou contenha apenas a marcação genérica "Outros" — **e** (2) o campo Especificar Outro também estiver vazio ou contiver um termo inválido (como "." ou "-"). Nesse cenário, o atendimento continua sendo contabilizado nos KPIs gerais, só não aparece com um serviço identificável no gráfico de detalhamento.
 
+### 🛠️ A Função `padronizarOutros()`
 Como textos livres geram muita sujeira (erros de digitação, letras minúsculas, gírias), o sistema passa essas respostas por uma "lavanderia" chamada `padronizarOutros()` (localizada mais para o final do `index.html`).
 
 Se os usuários começarem a usar muito uma sigla nova (ex: "PGFN" para parcelamento), você pode adicionar uma regra de aproximação dentro dessa função:
@@ -147,6 +162,7 @@ Dessa forma, "PGFN", "pgfn", "Pgfn..." vão virar uma barra única e limpa no gr
 2. **Fuja de Termos Muito Curtos:** Nunca cadastre palavras como `"IR"`, `"CPF"` ou `"MEI"` sozinhas no dicionário. Como a comparação funciona nos dois sentidos (ver Seção 2), termos curtos aumentam ainda mais o risco de *match* acidental — por exemplo, uma pessoa que digitar "PRI**MEI**RO" no campo "Outros" seria contabilizada como "Abertura de MEI". Use trechos maiores: `"INSCRIÇÃO DE MEI"`, `"AJUSTE ANUAL DO IRPF"`.
 3. **Sincronização com o Forms:** Se a coordenação mudar a redação de uma pergunta no Google Forms (Ex: de "Informações de ITR" para "Dúvidas sobre ITR"), lembre-se de vir no código e atualizar o dicionário, caso contrário os novos atendimentos cairão na aba "Outros".
 4. **Backup Rápido:** Antes de mexer nas chaves e vírgulas do dicionário, copie o código original e cole num Bloco de Notas. Se o painel quebrar após a sua edição, você tem como reverter em segundos.
+5. **Vírgulas no Texto:** Se uma nova opção oficial do Forms tiver vírgula no próprio texto, não se preocupe — o sistema já detecta e trata isso automaticamente (ver Seção 3).
 
 ---
 

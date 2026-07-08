@@ -1,18 +1,18 @@
-# 📖 Documentação: Firewall de Dados Sensíveis (Dashboard NAF)
+# 📖 Filtro de Colunas Sensíveis (Dashboard NAF)
 
 
 ## 🛡️ Visão Geral
 
-O "Firewall de Dados" é um mecanismo de segurança implementado no backend (`Código.gs`). Seu objetivo é impedir que Informações de Identificação Pessoal (PII) e dados sensíveis trafeguem do servidor do Google para o navegador do usuário.
+O "Filtro de Colunas Sensíveis" é um mecanismo implementado no backend (`Código.gs`). Seu objetivo é impedir que colunas identificadas como Informações de Identificação Pessoal (PII) e dados sensíveis trafeguem do servidor do Google para o navegador do usuário.
 
-A única exceção é o CPF: em vez de ser bloqueado sumariamente, ele é interceptado e transformado em um código anônimo irreversível (Hash SHA-256 com Salt). Isso permite que o Dashboard contabilize se um contribuinte retornou (fidelização), sem nunca saber quem ele é.
+A única exceção é o CPF: em vez de ser bloqueado sumariamente, ele é interceptado e transformado em um hash pseudonimizado (SHA-256 com Salt). Isso permite que o Dashboard contabilize se um contribuinte retornou (fidelização), sem expor o CPF original em texto puro. Assim como no README, vale lembrar que esse hash não deve ser tratado como irreversível caso o Salt seja exposto — por isso é importante configurar `SALT_HASH_CPF` com um valor próprio, em vez de manter o padrão do código.
 
 ## ⚙️ Como Funciona (O Fluxo Lógico via Index Mapping)
 
-Para garantir máxima velocidade, o firewall não analisa célula por célula. Ele lê o cabeçalho uma única vez e cria um "mapa de colunas permitidas":
+Para garantir máxima velocidade, o filtro não analisa célula por célula. Ele lê o cabeçalho uma única vez e cria um "mapa de colunas permitidas":
 
-1. **Higienização do Cabeçalho:** Converte os títulos para minúsculas e remove os acentos (ex: "E-mail" vira "e-mail").
-2. **Interceptação do CPF:** Se a coluna for identificada como CPF, o sistema anota a posição dela para aplicar a criptografia posteriormente.
+1. **Higienização do Cabeçalho:** Converte os títulos para minúsculas e remove os acentos (ex: "Endereço" vira "endereco").
+2. **Interceptação do CPF:** Se a coluna for identificada como CPF, o sistema anota a posição dela para aplicar o hash posteriormente.
 3. **Validação por Regex:** O texto normalizado das demais colunas é testado contra uma lista de palavras proibidas utilizando limites de palavra (`\b`), o que evita falsos positivos (ex: barra "rg" isolado, mas permite "carga"). As colunas aprovadas entram para a lista de `colunasPermitidas`.
 
 ## 💻 O Código-Fonte
@@ -21,7 +21,7 @@ Este é o bloco lógico da nova arquitetura de alta performance, executado antes
 
 ```javascript
 // O Regex é instanciado FORA do loop para economizar memória (Alta Performance)
-const regexProibido = /\b(cpf|cnpj|contribuinte|telefone|celular|email|e-mail|rg|identidade|nascimento|endereco|senha)\b/;
+const regexProibido = /\b(nome|cpf|cnpj|contribuinte|telefone|celular|email|e-mail|rg|identidade|nascimento|endereco|senha)\b/;
 
 let indiceCpf = -1;
 const colunasPermitidas = [];
@@ -37,7 +37,7 @@ cabecalhoLocal.forEach((nomeColuna, i) => {
     return;
   }
 
-  // Se passar no firewall, entra no mapa de colunas permitidas
+  // Se passar no filtro, entra no mapa de colunas permitidas
   if (!regexProibido.test(nomeTratado)) {
     colunasPermitidas.push({ nomeOriginal: nomeColuna.toString(), index: i });
   }
@@ -58,7 +58,7 @@ Para evitar que o filtro seja burlado por erros de digitação ou formatações 
 
 ### 3. Validação por Expressão Regular (Regex)
 
-O texto normalizado é testado contra uma lista de palavras proibidas utilizando Regex. O uso de **limites de palavra (`\b`)** garante precisão absoluta, evitando **falsos positivos**.
+O texto normalizado é testado contra uma lista de palavras proibidas utilizando Regex. O uso de **limites de palavra (`\b`)** reduz bastante o risco de **falsos positivos**.
 
 * *Exemplo prático:* A regra barra a palavra isolada `rg`. Se não houvesse o limite de palavra, uma coluna perfeitamente segura chamada `carga horária` ou `margem` seria bloqueada acidentalmente, pois contém as letras "r" e "g" juntas.
 
@@ -68,6 +68,7 @@ O texto normalizado é testado contra uma lista de palavras proibidas utilizando
 
 A expressão regular atual bloqueia qualquer coluna cujo título contenha as seguintes palavras isoladas:
 
+* `nome` (Nome completo do contribuinte)
 * `cpf` / `cnpj` (Identificação Fiscal)
 * `contribuinte` (Geralmente atrelado ao "Nome do Contribuinte")
 * `telefone` / `celular` (Contato direto)

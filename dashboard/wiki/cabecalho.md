@@ -83,5 +83,6 @@ const keyCarimbo = colunas.find(k => limparTexto(k).includes('carimbo'));
 
 ```
 
-1. **Plano A:** Ele procura a coluna que contenha `data de atendimento` e tenta usá-la.
-2. **Plano B:** Se o aluno deixou essa data em branco ou digitou um texto inválido, o sistema recua imediatamente e puxa a data do `carimbo` (Timestamp), que é gerado automaticamente pelo servidor do Google Forms no momento do envio e não pode ser apagado.
+1. **Plano A:** Ele procura a coluna que contenha `data de atendimento` e tenta usá-la, se ela for válida.
+2. **Plano B:** Se a Data de Atendimento estiver em branco, o sistema usa diretamente a data do `carimbo` (Timestamp), gerado automaticamente pelo servidor do Google Forms no momento do envio.
+3. **Plano C:** Se a Data de Atendimento foi preenchida, mas é inválida (fora do calendário, fora do intervalo aceito, etc.), o sistema **não** recua direto para o carimbo — ele primeiro tenta estimar uma data provável a partir da mediana histórica de atraso, e só usa o carimbo puro se essa estimativa não for possível. Os critérios completos estão em [Regras de Negócio](regras-de-negocio.md).

@@ -370,6 +370,19 @@ Veja o arquivo LICENSE para mais detalhes.
             "Outros": [] // Tratado de forma dinâmica mais abaixo
         };
 
+        // Alguns textos oficiais do dicionário contêm vírgula própria (ex: "...FÍSICA, MENTAL OU VISUAL").
+        // Como a vírgula também é o separador de múltipla escolha, é preciso reconhecer esses casos
+        // por inteiro ANTES de fatiar a célula — senão o texto se parte e conta a mais.
+        // Calculado uma única vez, fora do loop de linhas, por performance.
+        const CHAVES_COM_VIRGULA = [];
+        for (const [catNome, chaves] of Object.entries(categoriasDicionario)) {
+            if (catNome === "Outros") continue;
+            for (const chave of chaves) {
+                if (chave.includes(',')) CHAVES_COM_VIRGULA.push({ catNome, chave });
+            }
+        }
+        CHAVES_COM_VIRGULA.sort((a, b) => b.chave.length - a.chave.length);
+
         // Lista de variações conhecidas que diferentes versões do formulário usam
         // como gatilho para o campo de texto livre "especifique" (ex: formulário A usa "Outro",
         // formulário B usa "Outros"). Esses termos NÃO representam um serviço em si,
@@ -657,8 +670,18 @@ Veja o arquivo LICENSE para mais detalhes.
                 let serviçosDestaLinha = [];
 
                 // 1. Mapeia todos os serviços da múltipla escolha
-                // Separa os serviços individuais da string de múltipla escolha
-                const termosIndividuais = tiposStrOriginal
+
+                // Extrai primeiro os textos completos que têm vírgula própria, removendo-os da string
+                let tiposRestante = tiposStrOriginal;
+                for (const { catNome, chave } of CHAVES_COM_VIRGULA) {
+                    if (tiposRestante.includes(chave)) {
+                        serviçosDestaLinha.push({ categoria: catNome, subcategoria: "PADRÃO" });
+                        tiposRestante = tiposRestante.split(chave).join('');
+                    }
+                }
+
+                // Separa os serviços individuais restantes da string de múltipla escolha
+                const termosIndividuais = tiposRestante
                     .split(',')
                     .map(t => t.trim())
                     .filter(t => t !== "");

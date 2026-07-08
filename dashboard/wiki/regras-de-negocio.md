@@ -30,10 +30,20 @@ A idade numérica capturada é automaticamente agrupada em blocos para facilitar
 Para evitar que o gráfico de serviços fique poluído com erros de digitação (ex: "irpf", "imposto de renda", "declaração de ir"), a função `padronizarOutros()` agrupa termos semelhantes.
 
 ### Exemplos de Agrupamento Automático:
-* **CONTA GOV.BR:** Agrupa termos como "Gov", "Ouro", "Prata", "Bronze".
-* **RECUPERAÇÃO DE SENHA:** Agrupa "Senha", "Acesso", "eCAC".
-* **SERVIÇOS MEI:** Agrupa "MEI", "DASN", "Inscrição MEI".
-* **IMPOSTO DE RENDA:** Agrupa "IRPF", "IR", "Imposto de Renda", "Declaração".
+* **CONTA GOV.BR (CRIAÇÃO/NÍVEIS):** Agrupa termos como "Gov", "Ouro", "Prata", "Bronze".
+* **RECUPERAÇÃO DE SENHA / ACESSO:** Agrupa "Senha", "Acesso", "eCAC".
+* **DECLARAÇÃO RETIFICADORA (IRPF):** Agrupa "Retificadora".
+* **RESTITUIÇÃO / PERDCOMP:** Agrupa "Restitui" (restituição, restituir) e "Perdcomp".
+* **MALHA FINA / REGULARIZAÇÃO:** Agrupa "Malha", "Pendência", "Regulariza".
+* **IMPOSTO DE RENDA (DÚVIDAS/DECLARAÇÃO):** Agrupa "IRPF", "IR", "Imposto de Renda", "IRRF".
+* **EMISSÃO DE DARF / GUIA:** Agrupa "DARF", "Guia", "Sicalc".
+* **COMPENSAÇÃO / MULTAS:** Agrupa "Compensa" (compensação) e "Multa".
+* **PARCELAMENTO DE DÉBITOS:** Agrupa "Parcelamento", "Parcela".
+* **SERVIÇOS INSS:** Agrupa "INSS", "Previdência".
+* **SERVIÇOS MEI (GERAL):** Agrupa "MEI", "DASN".
+* **CNPJ (BAIXA/ALTERAÇÃO):** Agrupa "CNPJ", "Baixa", "Alteração".
+
+> **Nota:** essa lista reflete as regras atuais em `padronizarOutros()` no `index.html`. Se você adicionar uma nova regra no código, lembre de atualizar esta lista também — ela já ficou desatualizada uma vez.
 
 **Manutenção:** Se uma nova demanda recorrente aparecer com nomes variados, adicione uma nova regra `if (t.includes('termo'))` dentro da função no `index.html`.
 
@@ -59,8 +69,10 @@ A data usada no dashboard segue uma ordem de prioridade:
 * **Validação de Calendário:** a data precisa existir de verdade no calendário. Exemplos inválidos, como `31/02/2024`, `99/99/2025` ou `00/13/2026`, são rejeitados.
 * **Trava de Data Mínima:** datas anteriores a **01/01/2021** são consideradas inválidas para proteger o gráfico histórico.
 * **Trava de Data Máxima:** datas posteriores ao dia atual também são consideradas inválidas, pois o formulário registra apenas atendimentos já realizados.
+* **Consistência com o Carimbo:** quando o Carimbo é válido, uma Data de Atendimento posterior a ele também é tratada como inválida — isso indicaria que o atendimento foi lançado no formulário antes de ter acontecido.
 * **Estimativa por Mediana:** quando a **"Data de Atendimento"** foi preenchida, mas é inválida, o sistema tenta estimar a provável data do atendimento usando o **Carimbo de Data/Hora** menos a mediana histórica de atraso no lançamento.
-* **Fallback Automático:** se a mediana não for confiável ou não houver amostra suficiente, o sistema utiliza o **"Carimbo de Data/Hora"**, que é o timestamp automático gerado pelo Google Forms.
+* **Revalidação da Estimativa:** a data estimada pela mediana também precisa cair dentro do intervalo aceito (entre a Data Mínima e hoje). Se cair fora desse intervalo, a estimativa é descartada mesmo que a mediana em si seja considerada confiável, e o sistema usa o Carimbo como fallback.
+* **Fallback Automático:** se a mediana não for confiável, não houver amostra suficiente, ou a Data de Atendimento estiver em branco, o sistema utiliza o **"Carimbo de Data/Hora"**, que é o timestamp automático gerado pelo Google Forms.
 * **Descarte Seguro:** se nem a **"Data de Atendimento"** nem o **"Carimbo"** forem datas válidas, a linha é ignorada no processamento.
 
 Essa regra evita que datas digitadas incorretamente prejudiquem os filtros de ano/mês, o gráfico de evolução histórica e os cálculos comparativos do dashboard.
@@ -70,6 +82,10 @@ Essa regra evita que datas digitadas incorretamente prejudiquem os filtros de an
 ### 5.1. Como a mediana é calculada
 
 A mediana mede o atraso típico entre a data real do atendimento e o momento em que o atendimento foi lançado no formulário.
+
+> **Nota:** o Carimbo do Google Forms registra data e hora, mas o sistema descarta o horário e compara apenas dia, mês e ano. Isso é feito na leitura de cada data, antes de qualquer comparação.
+
+> **Atenção:** a estimativa por mediana só é tentada quando a Data de Atendimento **foi preenchida, mas é inválida** (fora do calendário, fora do intervalo aceito, ou posterior ao Carimbo). Se o campo estiver **em branco**, o sistema pula direto para o Carimbo, sem tentar estimar.
 
 O cálculo usa a diferença:
 
@@ -135,6 +151,8 @@ O sistema considera confiável apenas a mediana calculada com:
 * dados reais, sem usar datas já estimadas para gerar novas estimativas.
 
 Se esses critérios não forem atendidos, a mediana é considerada não confiável e o sistema usa o Carimbo como fallback.
+
+Além disso, mesmo com a mediana confiável, a **data estimada resultante** (Carimbo − mediana) precisa cair dentro do intervalo de datas aceito pelo sistema (entre a Data Mínima e hoje). Se a conta resultar em uma data fora desse intervalo, o sistema descarta a estimativa e usa o Carimbo diretamente — essa é a última verificação antes de aceitar uma data estimada.
 
 O limite de **90 dias** foi adotado porque o período de declaração do Imposto de Renda costuma durar pouco mais de dois meses. Assim, o sistema aceita atrasos operacionais maiores durante períodos de alta demanda, sem considerar automaticamente esses registros como extremos.
 
@@ -379,13 +397,14 @@ const dateParsed = dataResolvida.dataStr;
 ### 5.8. Resumo da regra
 
 ```text
-1. Tenta usar a Data de Atendimento.
-2. Se a Data de Atendimento for válida, usa essa data.
-3. Se a Data de Atendimento foi preenchida, mas é inválida, tenta estimar por mediana.
-4. A mediana usa os 365 dias anteriores ao Carimbo da própria linha.
-5. Se a mediana for confiável, usa Carimbo - mediana.
-6. Se a mediana não for confiável, usa o Carimbo.
-7. Se o Carimbo também for inválido, ignora a linha.
+1. Se o Carimbo for inválido, ignora a linha (ver seção 5.9).
+2. Tenta usar a Data de Atendimento.
+3. Se a Data de Atendimento for válida e não for posterior ao Carimbo, usa essa data.
+4. Se a Data de Atendimento estiver em branco, pula direto para o Carimbo (não tenta estimar).
+5. Se a Data de Atendimento foi preenchida, mas é inválida (ou é posterior ao Carimbo), tenta estimar por mediana.
+6. A mediana usa os 365 dias anteriores ao Carimbo da própria linha.
+7. Se a mediana for confiável e a data estimada cair dentro do intervalo aceito, usa Carimbo - mediana.
+8. Se a mediana não for confiável, ou a data estimada cair fora do intervalo aceito, usa o Carimbo.
 ```
 
 ### 5.9 Trava Data de Carimbo
@@ -404,7 +423,7 @@ const EXIGIR_CARIMBO = true;
 
 A Taxa de Retorno, visível na aba "Geral", mede quantos contribuintes usaram o NAF mais de uma vez em dias distintos.
 
-* **Lógica Base:** Como o sistema é protegido pela LGPD, o frontend não recebe CPFs, apenas o `usuarioHash`.
+* **Lógica Base:** Como o frontend não recebe CPF — apenas o `usuarioHash` — o sistema usa esse hash como identificador indireto do contribuinte.
 * **Cálculo:** O código agrupa todos os atendimentos feitos pelo mesmo `usuarioHash`. Em seguida, ele analisa a `Data de Atendimento`. Se o mesmo Hash possuir registros em duas ou mais datas diferentes, ele é contabilizado como "Pessoa Recorrente".
 * **Fórmula:** `(Total de Pessoas Recorrentes / Total de Hashes Únicos) * 100`.
 * **Atenção:** Se uma pessoa fizer três serviços *no mesmo dia*, ela **não** será considerada recorrente, apenas gerará mais volume operacional.
