@@ -60,7 +60,7 @@ No portal GAS, configure as IDs das suas planilhas em **Configurações do Proje
 * `PLANILHA_ID_3` / `TAB_NOME_3`: usados caso exista uma terceira fonte de dados.
 * `SALT_HASH_CPF`: chave usada para gerar o hash pseudonimizado dos CPFs.
 
-## 📖 Documentação Técnica (Wiki)
+## 📖 Documentação Técnica (Wiki) | Manual do Dashboard
 
 Para garantir a manutenção de longo prazo e a escalabilidade do projeto, consulte os manuais específicos abaixo:
 
