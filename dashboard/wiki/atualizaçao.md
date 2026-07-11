@@ -71,9 +71,16 @@ Na primeira vez que você implantar (ou se mudar quem pode acessar), verifique e
     * *Eu (sua conta):* O app usa as suas permissões para ler as planilhas. (Recomendado para NAF).
     * *Usuário que acessa o app:* Cada pessoa precisa ter acesso às planilhas originais.
 
+> **Recomendação:** se o NAF tiver (ou puder criar) uma conta institucional do Google — não vinculada a uma pessoa específica, tipo `naf.suainstituicao@gmail.com` — prefira implantar e executar o Web App a partir dela, em vez da conta pessoal de um voluntário ou coordenador. Isso evita que o Dashboard fique dependente de uma única pessoa continuar com acesso à conta: se ela sair do núcleo, o projeto pode ficar sem ninguém capaz de editá-lo ou reimplantá-lo até que a propriedade do arquivo seja transferida no Google Drive.
+
 
 * **Quem pode acessar:**
-    * *Qualquer pessoa com uma conta Google:* (Recomendado para uso interno no núcleo).
+    * **Apenas eu:** só a sua própria conta Google consegue abrir o Dashboard. Serve para testar sozinho, mas não funciona para publicar o link para o NAF usar.
+    * **Pessoas com conta institucional:** limita o acesso a quem tem uma conta da própria organização (ex: `@suainstituicao.edu.br`). Essa opção só existe se a instituição usa **Google Workspace**; com contas Gmail comuns, ela nem aparece como opção. É a mais restritiva de fato, porque distingue quem é da instituição de quem não é.
+    * **Pessoas com conta Google:** qualquer pessoa com uma conta Google (Gmail ou não) consegue acessar, desde que tenha o link. Quando a instituição usa contas Gmail comuns (sem Workspace), essa é a opção mais restritiva disponível — mas ela não diferencia "alguém do NAF" de "qualquer pessoa no mundo com conta Google". Na prática, a única barreira adicional é o link não circular publicamente.
+    * **Todo mundo (não recomendado):** libera o acesso sem exigir login nenhum. Além de não ter nenhum controle de quem acessa, deixa o link exposto a bots, crawlers e scanners automáticos — esse tráfego indesejado pode consumir a cota diária de execução do Apps Script (bem mais apertada em contas Gmail comuns do que em contas Workspace) e derrubar o Dashboard para os usuários reais.
+
+**Independentemente da opção escolhida:** evite divulgar o link do Web App em canais públicos (grupos abertos, redes sociais, páginas indexadas por buscadores). Quanto mais gente tiver o link, maior a chance de ele circular além do público pretendido e gerar tráfego indesejado — e, no caso das opções sem exigência de conta institucional, esse tráfego conta contra a mesma cota diária do Apps Script.
 
 
 ## 6. Resolução de Problemas (Troubleshooting)

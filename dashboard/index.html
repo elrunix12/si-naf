@@ -21,7 +21,7 @@ Veja o arquivo LICENSE para mais detalhes.
     <title>Dashboard NAF - Analytics Center</title>
 
     <?!= HtmlService.createHtmlOutputFromFile('style').getContent(); ?>
-    
+
     <?!= HtmlService.createHtmlOutputFromFile('Lib_ChartJS').getContent(); ?>
     <?!= HtmlService.createHtmlOutputFromFile('Lib_DataLabels').getContent(); ?>
 </head>
@@ -29,7 +29,7 @@ Veja o arquivo LICENSE para mais detalhes.
 
     <header class="bg-blue-900 text-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-6 py-3 flex flex-col lg:flex-row justify-between items-center gap-4">
-            
+
             <div class="flex-shrink-0 text-center lg:text-left">
                 <h1 class="text-xl font-bold">Dashboard Analítico NAF</h1>
                 <p class="text-xs text-blue-200">Conectado ao Google Sheets • Nuvem</p>
@@ -50,9 +50,9 @@ Veja o arquivo LICENSE para mais detalhes.
                     <select id="filter-municipio" class="bg-blue-900 border border-blue-700 text-white text-sm rounded focus:ring-2 focus:ring-blue-400 p-1.5 max-w-[160px] truncate global-filter outline-none cursor-pointer">
                         <option value="ALL">Município: Todos</option>
                     </select>
-                    <button 
-                        id="btn-reset" 
-                        class="text-xs text-blue-200 hover:text-white font-medium ml-1 px-3 py-1.5 rounded border border-blue-700 hover:bg-blue-700 transition-colors cursor-pointer" 
+                    <button
+                        id="btn-reset"
+                        class="text-xs text-blue-200 hover:text-white font-medium ml-1 px-3 py-1.5 rounded border border-blue-700 hover:bg-blue-700 transition-colors cursor-pointer"
                         title="Limpar Filtros"
                     >
                         Limpar
@@ -61,9 +61,9 @@ Veja o arquivo LICENSE para mais detalhes.
             </div>
 
             <div class="flex items-center space-x-2 lg:space-x-4 flex-shrink-0">
-                <button 
-                    id="btn-toggle-estimadas" 
-                    class="hidden icon-toggle-btn p-2 bg-blue-800 hover:bg-blue-700 text-blue-200 hover:text-white rounded transition shadow-inner cursor-pointer" 
+                <button
+                    id="btn-toggle-estimadas"
+                    class="hidden icon-toggle-btn p-2 bg-blue-800 hover:bg-blue-700 text-blue-200 hover:text-white rounded transition shadow-inner cursor-pointer"
                     title="Informações sobre datas estimadas"
                     aria-label="Informações sobre datas estimadas"
                     aria-pressed="true"
@@ -73,9 +73,9 @@ Veja o arquivo LICENSE para mais detalhes.
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2a10 10 0 100 20 10 10 0 000-20z"></path>
                     </svg>
                 </button>
-                <button 
-                    id="btn-toggle-labels" 
-                    class="hidden icon-toggle-btn p-2 bg-blue-800 hover:bg-blue-700 text-blue-200 hover:text-white rounded transition shadow-inner cursor-pointer" 
+                <button
+                    id="btn-toggle-labels"
+                    class="hidden icon-toggle-btn p-2 bg-blue-800 hover:bg-blue-700 text-blue-200 hover:text-white rounded transition shadow-inner cursor-pointer"
                     title="Mostrar ou ocultar valores nos gráficos"
                     aria-label="Valores dos gráficos"
                     aria-pressed="false"
@@ -193,7 +193,7 @@ Veja o arquivo LICENSE para mais detalhes.
                     </div>
                     <p class="text-xs text-slate-400 mt-2">Registros únicos na linha do tempo</p>
                 </div>
-                
+
                 <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm border-l-4 border-l-sky-500 relative">
                     <h3 class="text-slate-500 text-sm font-semibold mb-1">Público Majoritário</h3>
                     <div class="flex flex-col items-start">
@@ -202,7 +202,7 @@ Veja o arquivo LICENSE para mais detalhes.
                     </div>
                     <p class="text-xs text-slate-400 mt-2">Perfil mais atendido no período</p>
                 </div>
-                
+
                 <div class="bg-white p-6 rounded-xl border border-slate-100 shadow-sm border-l-4 border-l-emerald-500 relative">
                     <h3 class="text-slate-500 text-sm font-semibold mb-1">Taxa de Retorno</h3>
                     <div class="flex flex-col items-start">
@@ -285,7 +285,7 @@ Veja o arquivo LICENSE para mais detalhes.
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 lg:col-span-2 flex flex-col">
                     <div class="flex justify-between items-start sm:items-center mb-4 gap-2">
                         <h3 class="text-md font-bold text-slate-700">Faixa Etária</h3>
@@ -370,7 +370,38 @@ Veja o arquivo LICENSE para mais detalhes.
             "Outros": [] // Tratado de forma dinâmica mais abaixo
         };
 
+        // Alguns textos oficiais do dicionário contêm vírgula própria (ex: "...FÍSICA, MENTAL OU VISUAL").
+        // Como a vírgula também é o separador de múltipla escolha, é preciso reconhecer esses casos
+        // por inteiro ANTES de fatiar a célula — senão o texto se parte e conta a mais.
+        // Calculado uma única vez, fora do loop de linhas, por performance.
+        const CHAVES_COM_VIRGULA = [];
+        for (const [catNome, chaves] of Object.entries(categoriasDicionario)) {
+            if (catNome === "Outros") continue;
+            for (const chave of chaves) {
+                if (chave.includes(',')) CHAVES_COM_VIRGULA.push({ catNome, chave });
+            }
+        }
+        CHAVES_COM_VIRGULA.sort((a, b) => b.chave.length - a.chave.length);
+
+        // Lista de variações conhecidas que diferentes versões do formulário usam
+        // como gatilho para o campo de texto livre "especifique" (ex: formulário A usa "Outro",
+        // formulário B usa "Outros"). Esses termos NÃO representam um serviço em si,
+        // então não devem virar uma categoria/barra própria no gráfico.
+        const MARCADORES_GENERICOS_OUTRO = ["OUTRO", "OUTROS"];
+
+        // Verifica se um termo da múltipla escolha é apenas o marcador genérico de "outro",
+        // ignorando pontuação comum no final (: ; . ,) que pode variar entre formulários.
+        function isMarcadorGenerico(termoOriginal) {
+            const limpo = termoOriginal.replace(/[:;.,]+$/, "").trim();
+            return MARCADORES_GENERICOS_OUTRO.includes(limpo);
+        }
+
         // Variáveis Globais de Estado
+
+        // true = Exige que a linha tenha um carimbo válido do Forms para ser lida.
+        // false = Funciona como o sistema antigo (lê apenas pela Data de Atendimento).
+        const EXIGIR_CARIMBO = true;
+
         let globalAtendimentos = []; // Armazena a base de dados tratada ("Livro Diário")
         let chartInstances = {};     // Guarda referências dos gráficos do Chart.js para destruí-los/atualizá-los
         let currentTab = 'geral';    // Aba ativa no momento
@@ -386,9 +417,9 @@ Veja o arquivo LICENSE para mais detalhes.
             align: 'end',
             anchor: 'end',
             formatter: Math.round,
-            display: function(context) { 
+            display: function(context) {
                 // Exibe o número apenas se o toggle estiver ativo e o valor for maior que 0
-                return mostrarNumeros && context.dataset.data[context.dataIndex] > 0; 
+                return mostrarNumeros && context.dataset.data[context.dataIndex] > 0;
             }
         });
 
@@ -441,7 +472,7 @@ Veja o arquivo LICENSE para mais detalhes.
         // ==========================================
         // 4 EVENT LISTENERS DOS CONTROLES (UI)
         // ==========================================
-        
+
         // Botão de Toggle de Datas Estimadas por Mediana
         const btnToggleEstimadas = document.getElementById('btn-toggle-estimadas');
         if (btnToggleEstimadas) {
@@ -517,20 +548,20 @@ Veja o arquivo LICENSE para mais detalhes.
         function switchTab(tabId) {
             currentTab = tabId;
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            
+
             // Remove a seleção de todas as abas (agora também remove a cor cinza inativa!)
             document.querySelectorAll('.tab-btn').forEach(el => {
                 el.classList.remove('active-tab', 'border-blue-800', 'text-blue-900', 'bg-blue-50', 'font-semibold');
                 el.classList.add('border-transparent', 'text-slate-500', 'font-medium');
             });
-            
+
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            
+
             // Adiciona a cor azul e REMOVE explicitamente a cor cinza
             const activeBtn = document.getElementById(`nav-${tabId}`);
             activeBtn.classList.remove('border-transparent', 'text-slate-500', 'font-medium');
             activeBtn.classList.add('active-tab', 'border-blue-800', 'text-blue-900', 'bg-blue-50', 'font-semibold');
-            
+
             renderizarDashboard();
 
             // Pequeno atraso para garantir que o elemento esteja visível antes do redimensionamento
@@ -552,7 +583,7 @@ Veja o arquivo LICENSE para mais detalhes.
 
         function processarDadosBrutos(rawData) {
             globalAtendimentos = [];
-            let anosEncontrados = new Set(); 
+            let anosEncontrados = new Set();
             let municipiosEncontrados = new Set();
             let tiposUserEncontrados = new Set();
 
@@ -568,6 +599,18 @@ Veja o arquivo LICENSE para mais detalhes.
 
                 const dataAtendimentoStr = keyAtendimento ? String(row[keyAtendimento] || "").trim() : "";
                 const carimboStr = keyCarimbo ? String(row[keyCarimbo] || "").trim() : "";
+
+                // --- INÍCIO DA NOVA TRAVA DE SEGURANÇA ---
+                if (EXIGIR_CARIMBO) {
+                    // Tenta converter o carimbo em uma data válida usando a sua função padrão
+                    const carimboValido = parseDataBrasileira(carimboStr);
+
+                    // Se o carimbo não existir ou estiver fora do intervalo aceito (muito antigo ou no futuro)
+                    if (!dataDentroDoIntervalo(carimboValido)) {
+                        return; // O 'return' aqui faz o código abortar esta linha e pular para a próxima!
+                    }
+                }
+                // --- FIM DA NOVA TRAVA DE SEGURANÇA ---
 
                 const dataResolvida = resolverDataAtendimento(dataAtendimentoStr, carimboStr, contextoMediana);
 
@@ -585,10 +628,10 @@ Veja o arquivo LICENSE para mais detalhes.
                 const municipioKey = colunas.find(k => limparTexto(k).includes('municipio'));
                 const tipoUserKey = colunas.find(k => limparTexto(k).includes('tipo de usuario'));
                 const idadeKey = colunas.find(k => limparTexto(k).includes('idade'));
-                
+
                 // 2. Tratamento de Idade (Proteção contra NaN)
                 const idadeBruta = String(row[idadeKey] || "0").replace(/\D/g, '');
-                const idadeExtraida = parseInt(idadeBruta) || 0; 
+                const idadeExtraida = parseInt(idadeBruta) || 0;
                 const faixaEtaria = categorizarIdade(idadeExtraida, row[idadeKey]);
 
                 // 3. Tratamento de Datas e Municípios
@@ -603,22 +646,22 @@ Veja o arquivo LICENSE para mais detalhes.
                 if (municipioExtraido) municipiosEncontrados.add(municipioExtraido);
 
                 // Tratamento Inteligente de Gênero) ---
-                const textoSexo = limparTexto(row[sexoKey]); 
+                const textoSexo = limparTexto(row[sexoKey]);
                 let sexoFinal = "NÃO INFORMADO";
 
                 // Se tiver a palavra 'masculino' (independente de acento/maiúscula), é Masculino
                 if (textoSexo.includes("masculino")) {
                     sexoFinal = "MASCULINO";
-                } 
+                }
                 // Se tiver 'feminino', é Feminino
                 else if (textoSexo.includes("feminino")) {
                     sexoFinal = "FEMININO";
                 }
                 // Qualquer outra coisa (vazio, "N/A", "Não sei", etc) continua como "NÃO INFORMADO"
-                
+
                 // 4. Volume de Folhas
                 const folhasStr = String(row[folhasKey] || "0");
-                const numerosEncontrados = folhasStr.match(/\d+/g); 
+                const numerosEncontrados = folhasStr.match(/\d+/g);
                 const numFolhas = numerosEncontrados ? Math.max(...numerosEncontrados.map(Number)) : 0;
 
                 // 5. Mapeamento de Serviços (Flattening)
@@ -627,12 +670,41 @@ Veja o arquivo LICENSE para mais detalhes.
                 let serviçosDestaLinha = [];
 
                 // 1. Mapeia todos os serviços da múltipla escolha
-                for (const [catNome, chaves] of Object.entries(categoriasDicionario)) {
-                    if (catNome === "Outros") continue;
-                    for (const chave of chaves) {
-                        if (tiposStrOriginal.includes(chave)) {
+
+                // Extrai primeiro os textos completos que têm vírgula própria, removendo-os da string
+                let tiposRestante = tiposStrOriginal;
+                for (const { catNome, chave } of CHAVES_COM_VIRGULA) {
+                    if (tiposRestante.includes(chave)) {
+                        serviçosDestaLinha.push({ categoria: catNome, subcategoria: "PADRÃO" });
+                        tiposRestante = tiposRestante.split(chave).join('');
+                    }
+                }
+
+                // Separa os serviços individuais restantes da string de múltipla escolha
+                const termosIndividuais = tiposRestante
+                    .split(',')
+                    .map(t => t.trim())
+                    .filter(t => t !== "");
+
+                for (const termo of termosIndividuais) {
+                    let casou = false;
+
+                    for (const [catNome, chaves] of Object.entries(categoriasDicionario)) {
+                        if (catNome === "Outros") continue;
+                        if (chaves.some(chave => termo.includes(chave) || chave.includes(termo))) {
                             serviçosDestaLinha.push({ categoria: catNome, subcategoria: "PADRÃO" });
+                            casou = true;
+                            break; // Já achou a categoria, não precisa continuar
                         }
+                    }
+
+                    // Se nenhuma categoria reconheceu esse termo, vai para Outros —
+                    // exceto se for apenas o marcador genérico "Outro/Outros" do formulário,
+                    // que não carrega informação própria (o conteúdo real vem do campo
+                    // "especificar outro", tratado separadamente logo abaixo).
+                    if (!casou) {
+                        if (isMarcadorGenerico(termo)) continue;
+                        serviçosDestaLinha.push({ categoria: "Outros", subcategoria: termo });
                     }
                 }
 
@@ -677,7 +749,7 @@ Veja o arquivo LICENSE para mais detalhes.
             });
 
             // Atualização dos filtros e interface
-            popularDropdown(document.getElementById('filter-ano'), Array.from(anosEncontrados).sort((a, b) => b - a)); 
+            popularDropdown(document.getElementById('filter-ano'), Array.from(anosEncontrados).sort((a, b) => b - a));
             popularDropdown(document.getElementById('filter-municipio'), Array.from(municipiosEncontrados).sort());
 
             popularDropdown(document.getElementById('perf-tipo'), Array.from(tiposUserEncontrados).sort());
@@ -702,7 +774,7 @@ Veja o arquivo LICENSE para mais detalhes.
                 btnToggleEstimadas.classList.remove('hidden');
                 atualizarBotaoEstimadas();
             }
-            
+
             renderizarDashboard();
         }
 
@@ -712,11 +784,11 @@ Veja o arquivo LICENSE para mais detalhes.
 
         function renderizarDashboard() {
             atualizarEstilosFiltros(); // Pinta os filtros de azul claro se estiverem ativos
-            
+
             const fGlobalAno = document.getElementById('filter-ano');
             const fGlobalMes = document.getElementById('filter-mes');
             const fGlobalMuni = document.getElementById('filter-municipio');
-            
+
             const vAno = fGlobalAno ? fGlobalAno.value : "ALL";
             const vMes = fGlobalMes ? fGlobalMes.value : "ALL";
             const vMuni = fGlobalMuni ? fGlobalMuni.value : "ALL";
@@ -737,7 +809,7 @@ Veja o arquivo LICENSE para mais detalhes.
 
         function renderizarAbaGeral(dados, vAno, vMes, vMuni) {
             const countUnique = (arr) => new Set(arr.map(d => d.idLinha)).size;
-            
+
             let folhasTotais = 0;
             const linhasContadas = new Set();
             dados.forEach(d => {
@@ -754,7 +826,7 @@ Veja o arquivo LICENSE para mais detalhes.
             // --- CÁLCULO DO PÚBLICO MAJORITÁRIO ---
             const perfilContagem = {};
             const linhasProcessadasPerfil = new Set();
-            
+
             dados.forEach(d => {
                 if (!linhasProcessadasPerfil.has(d.idLinha)) {
                     linhasProcessadasPerfil.add(d.idLinha);
@@ -803,10 +875,10 @@ Veja o arquivo LICENSE para mais detalhes.
             }
 
             const taxaRecorrencia = totalPessoasComHash > 0 ? ((pessoasRecorrentes / totalPessoasComHash) * 100).toFixed(1) : 0;
-            
+
             document.getElementById('kpi-recorrencia').innerText = `${taxaRecorrencia}%`;
             document.getElementById('kpi-recorrencia-absoluto').innerText = pessoasRecorrentes > 0 ? `${pessoasRecorrentes} pessoas retornaram` : "S/ Base";
-            
+
             // Adaptação da função de crescimento enviando o vMuni
             calcularEExibirCrescimento(vAno, vMes, vMuni, atualPessoas, folhasTotais);
 
@@ -834,7 +906,7 @@ Veja o arquivo LICENSE para mais detalhes.
         function calcularEExibirCrescimento(vAno, vMes, vMuni, atualPessoas, atualFolhas) {
             const elPessoas = document.getElementById('kpi-total-growth');
             const elFolhas = document.getElementById('kpi-folhas-growth');
-            
+
             if (vAno === "ALL") {
                 if(elPessoas) elPessoas.innerHTML = "";
                 if(elFolhas) elFolhas.innerHTML = "";
@@ -856,10 +928,10 @@ Veja o arquivo LICENSE para mais detalhes.
             }
 
             const basePassada = globalAtendimentos.filter(d => d.ano === filtroAnoPassado && (filtroMesPassado === "ALL" || d.mes === filtroMesPassado) && (vMuni === "ALL" || d.municipio === vMuni));
-            
+
             const countUnique = (arr) => new Set(arr.map(d => d.idLinha)).size;
             const passadoPessoas = countUnique(basePassada);
-            
+
             let passadoFolhas = 0;
             const lPassadas = new Set();
             basePassada.forEach(d => { if (!lPassadas.has(d.idLinha)) { lPassadas.add(d.idLinha); passadoFolhas += d.folhas; } });
@@ -889,14 +961,14 @@ Veja o arquivo LICENSE para mais detalhes.
             if (!viewSubcategorias) {
                 const contagem = Object.keys(categoriasDicionario).reduce((acc, curr) => ({...acc, [curr]: 0}), {});
                 dadosLocais.forEach(d => { if(contagem[d.categoria] !== undefined) contagem[d.categoria]++; });
-                
+
                 // --- NOVA PARTE: Transforma em array e ordena do maior para o menor ---
                 const sortedCategorias = Object.entries(contagem).sort((a, b) => b[1] - a[1]);
-                
+
                 labels = sortedCategorias.map(item => item[0]);
                 valores = sortedCategorias.map(item => item[1]);
                 // -----------------------------------------------------------------------
-                
+
                 const temCat = valores.some(v => v > 0);
                 toggleEmptyState('chartCategorias', temCat);
                 if (temCat) criarGrafico('chartCategorias', 'bar', labels, valores, 'Volume', '#2563eb', false, 'y');
@@ -908,22 +980,22 @@ Veja o arquivo LICENSE para mais detalhes.
                     let sub = d.subcategoria === "." || d.subcategoria === "" ? "NÃO ESPECIFICADO" : d.subcategoria;
                     contagemOutros[sub] = (contagemOutros[sub] || 0) + 1;
                 });
-                
+
                 const sortedOutros = Object.entries(contagemOutros).sort((a, b) => b[1] - a[1]);
                 const topN = 20; // Separa os 10 principais
                 let topSubs = sortedOutros.slice(0, topN);
                 let demaisCount = sortedOutros.slice(topN).reduce((acc, curr) => acc + curr[1], 0);
-                
+
                 // Monta a lista final com o Top 10 + Demais Itens (se houver)
                 let listaFinal = [...topSubs];
-                if (demaisCount > 0) { 
-                    listaFinal.push(["DEMAIS ITENS", demaisCount]); 
+                if (demaisCount > 0) {
+                    listaFinal.push(["DEMAIS ITENS", demaisCount]);
                 }
 
                 // NOVA PARTE: Reordena a lista final para que o "DEMAIS ITENS" caia na posição correta da escadinha
                 listaFinal.sort((a, b) => b[1] - a[1]);
-                
-                labels = listaFinal.map(item => item[0]); 
+
+                labels = listaFinal.map(item => item[0]);
                 valores = listaFinal.map(item => item[1]);
 
                 const temCat = valores.length > 0;
@@ -948,7 +1020,7 @@ Veja o arquivo LICENSE para mais detalhes.
                 return (vServ === "ALL" || d.categoria === vServ) &&
                     (vTipo === "ALL" || d.tipoUser === vTipo) && // Substituído .includes() por ===
                     (vConclusao === "ALL" || d.conclusivo.includes(vConclusao)) &&
-                    (vGenero === "ALL" || d.sexo === vGenero); 
+                    (vGenero === "ALL" || d.sexo === vGenero);
             });
 
             // --- NOVO: GERAR GRÁFICO DE TIPO DE USUÁRIO ---
@@ -988,8 +1060,8 @@ Veja o arquivo LICENSE para mais detalhes.
             const generoPorPessoa = {};
 
             // Como já padronizamos lá em cima, é só ler direto:
-            dadosLocais.forEach(d => { 
-                if (!generoPorPessoa[d.idLinha]) generoPorPessoa[d.idLinha] = d.sexo; 
+            dadosLocais.forEach(d => {
+                if (!generoPorPessoa[d.idLinha]) generoPorPessoa[d.idLinha] = d.sexo;
             });
 
             Object.values(generoPorPessoa).forEach(sexo => {
@@ -1003,23 +1075,23 @@ Veja o arquivo LICENSE para mais detalhes.
 
             if (temGenero) {
                 criarGraficoPizza(
-                    'chartGenero', 
-                    ['Masculino', 'Feminino', 'Não Informado'], 
-                    [masc, fem, naoInfo], 
+                    'chartGenero',
+                    ['Masculino', 'Feminino', 'Não Informado'],
+                    [masc, fem, naoInfo],
                     ['#2563eb', '#0ea5e9', '#cbd5e1']
                 );
             }
 
             // Gráfico de Faixa Etária
             const mapIdade = {"Até 25":0, "26 a 40":0, "41 a 60":0, "Acima de 60":0, "Não Informado":0};
-            const idadePorPessoa = {}; 
+            const idadePorPessoa = {};
 
-            dadosLocais.forEach(d => { 
-                if(!idadePorPessoa[d.idLinha]) idadePorPessoa[d.idLinha] = d.idadeFaixa; 
+            dadosLocais.forEach(d => {
+                if(!idadePorPessoa[d.idLinha]) idadePorPessoa[d.idLinha] = d.idadeFaixa;
             });
 
-            Object.values(idadePorPessoa).forEach(faixa => { 
-                if(mapIdade[faixa] !== undefined) mapIdade[faixa]++; 
+            Object.values(idadePorPessoa).forEach(faixa => {
+                if(mapIdade[faixa] !== undefined) mapIdade[faixa]++;
             });
 
             // --- NOVA TRAVA: Remove "Não Informado" da legenda se for ZERO ---
@@ -1043,11 +1115,11 @@ Veja o arquivo LICENSE para mais detalhes.
             });
             const contagemMuni = {};
             for (const m in muniComIds) contagemMuni[m] = muniComIds[m].size;
-            
+
             const sortedMuni = Object.entries(contagemMuni).sort((a, b) => b[1] - a[1]);
             const labelsMuni = sortedMuni.map(item => item[0].toLowerCase().replace(/(^\w|\s\w)/g, m => m.toUpperCase()));
             const valoresMuni = sortedMuni.map(item => item[1]);
-            
+
             const temMuni = valoresMuni.length > 0;
             toggleEmptyState('chartMunicipios', temMuni);
             if (temMuni) criarGrafico('chartMunicipios', 'bar', labelsMuni, valoresMuni, 'Pessoas', '#475569', false, 'y');
@@ -1173,7 +1245,7 @@ Veja o arquivo LICENSE para mais detalhes.
 
         function criarGrafico(canvasId, type, labels, data, dataLabel, color, isLine = false, indexAxis = 'x') {
             const ctx = document.getElementById(canvasId).getContext('2d');
-            if(chartInstances[canvasId]) chartInstances[canvasId].destroy(); 
+            if(chartInstances[canvasId]) chartInstances[canvasId].destroy();
             chartInstances[canvasId] = new Chart(ctx, {
                 type: type,
                 data: {
@@ -1193,11 +1265,11 @@ Veja o arquivo LICENSE para mais detalhes.
                 options: {
                     animation: false, // Desabilitado para maior performance no Apps Script
                     indexAxis: indexAxis, // Define se a barra é horizontal (y) ou vertical (x)
-                    responsive: true, 
+                    responsive: true,
                     maintainAspectRatio: false,
                     layout: { padding: { top: 20, right: 35 } },
                     plugins: { legend: { display: false } }, // Esconde legenda principal (usada em pizza, não aqui)
-                    scales: { 
+                    scales: {
                         [indexAxis === 'x' ? 'y' : 'x']: { beginAtZero: true, grace: '10%', ticks: { precision: 0 } }
                     }
                 }
@@ -1288,7 +1360,7 @@ Veja o arquivo LICENSE para mais detalhes.
         }
 
         function normalizarStr(str) { return str ? String(str).toUpperCase().trim() : ""; }
-        
+
         const DATA_MINIMA_ATENDIMENTO = new Date(2021, 0, 1); // 01/01/2021
 
         const JANELA_MEDIANA_DIAS = 365;
@@ -1436,16 +1508,20 @@ Veja o arquivo LICENSE para mais detalhes.
 
         function resolverDataAtendimento(dataAtendimentoRaw, carimboRaw, contextoMediana) {
             const dataAtendimento = parseDataBrasileira(dataAtendimentoRaw);
+            const dataCarimbo = parseDataBrasileira(carimboRaw); // agora calculado logo no início
 
-            if (dataDentroDoIntervalo(dataAtendimento)) {
+            // Nova regra: Data de Atendimento não pode ser posterior ao Carimbo,
+            // quando o Carimbo existir e for uma data válida.
+            const atendimentoPosteriorAoCarimbo =
+                dataDentroDoIntervalo(dataCarimbo) && dataAtendimento && dataAtendimento > dataCarimbo;
+
+            if (dataDentroDoIntervalo(dataAtendimento) && !atendimentoPosteriorAoCarimbo) {
                 return {
                     dataStr: formatarDataDashboard(dataAtendimento),
                     origem: "DATA_ATENDIMENTO",
                     medianaDias: null
                 };
             }
-
-            const dataCarimbo = parseDataBrasileira(carimboRaw);
 
             if (!dataDentroDoIntervalo(dataCarimbo)) {
                 return null;
@@ -1498,7 +1574,7 @@ Veja o arquivo LICENSE para mais detalhes.
             const data = parseDataBrasileira(dateStr);
             return data ? String(data.getMonth() + 1).padStart(2, '0') : "Indefinido";
         }
-        
+
         // Alimenta dinamicamente as opções `<option>` de um select
         function popularDropdown(selectElement, arrayValores) {
             if(!selectElement) return;
@@ -1526,9 +1602,9 @@ Veja o arquivo LICENSE para mais detalhes.
             if (!texto) return "NÃO ESPECIFICADO";
             let t = texto.toUpperCase().trim();
             t = t.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Remove acentos
-            
+
             if (t === "." || t === "-" || t === "NADA" || /^[\d\s]+$/.test(t)) return "NÃO ESPECIFICADO";
-            
+
             // Regras de substituição de aproximação
             if (t.includes('GOV') || t.includes('OURO') || t.includes('PRATA') || t.includes('BRONZE')) return 'CONTA GOV.BR (CRIAÇÃO/NÍVEIS)';
             if (t.includes('SENHA') || t.includes('ACESSO') || t.includes('ECAC')) return 'RECUPERAÇÃO DE SENHA / ACESSO';
@@ -1542,7 +1618,7 @@ Veja o arquivo LICENSE para mais detalhes.
             if (t.includes('INSS') || t.includes('PREVIDENCIA')) return 'SERVIÇOS INSS';
             if (t.includes('MEI') || t.includes('DASN')) return 'SERVIÇOS MEI (GERAL)';
             if (t.includes('CNPJ') || t.includes('BAIXA') || t.includes('ALTERACAO')) return 'CNPJ (BAIXA/ALTERAÇÃO)';
-            
+
             // Remove preposições se o texto não for classificado acima
             t = t.replace(/\b(NO|NA|DO|DA|DE|O|A|E|PARA|COM|SOBRE)\b/g, ' ').replace(/\s+/g, ' ').trim();
             return t === "" ? "NÃO ESPECIFICADO" : t;

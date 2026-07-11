@@ -43,7 +43,7 @@ Esta é a lista de termos que o sistema procura automaticamente no cabeçalho da
 | `outroKey` | `respondeu outro` | Pega textos livres para detalhar outros serviços. | *Se **respondeu outro**, especifique:* |
 | `sexoKey` | `sexo` ou `genero` | Monta o gráfico de pizza de perfil do contribuinte. | *Qual o seu **sexo** / **gênero**?* |
 | `idadeKey` | `idade` | Calcula a média e as faixas etárias. | *Qual a sua **idade**?* |
-| `conclusivoKey` | `conclusivo` | Filtra a taxa de sucesso dos atendimentos. | *O atendimento prestado foi **conclusivo**?* |
+| `conclusivoKey` | `conclusivo` | Permite filtrar os gráficos pelo status de conclusão do atendimento. | *O atendimento prestado foi **conclusivo**?* |
 | `folhasKey` | `folhas` | Soma o indicador geral de volume de impressões. | *Se houver, quantas **folhas** foram impressas?* |
 | `municipioKey` | `municipio` | Monta o gráfico de alcance geográfico. | *Qual o **município** de residência?* |
 | `tipoUserKey` | `tipo de usuario` | Permite filtrar entre Pessoa Física (PF) e Jurídica (PJ). | ***Tipo de usuário** dos serviços (PF ou PJ)?* |
@@ -83,5 +83,6 @@ const keyCarimbo = colunas.find(k => limparTexto(k).includes('carimbo'));
 
 ```
 
-1. **Plano A:** Ele procura a coluna que contenha `data de atendimento` e tenta usá-la.
-2. **Plano B:** Se o aluno deixou essa data em branco ou digitou um texto inválido, o sistema recua imediatamente e puxa a data do `carimbo` (Timestamp), que é gerado automaticamente pelo servidor do Google Forms no momento do envio e não pode ser apagado.
+1. **Plano A:** Ele procura a coluna que contenha `data de atendimento` e tenta usá-la, se ela for válida.
+2. **Plano B:** Se a Data de Atendimento estiver em branco, o sistema usa diretamente a data do `carimbo` (Timestamp), gerado automaticamente pelo servidor do Google Forms no momento do envio.
+3. **Plano C:** Se a Data de Atendimento foi preenchida, mas é inválida (fora do calendário, fora do intervalo aceito, etc.), o sistema **não** recua direto para o carimbo — ele primeiro tenta estimar uma data provável a partir da mediana histórica de atraso, e só usa o carimbo puro se essa estimativa não for possível. Os critérios completos estão em [Regras de Negócio](regras-de-negocio.md).

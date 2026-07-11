@@ -1,0 +1,215 @@
+Data da Geração: 2026-07-05 15:42:41
+
+==================================================
+📋 RELATÓRIO INDIVIDUAL - ARQUIVO 1
+==================================================
+Ficheiro: test/dados_naf_auditoria_1.csv
+Hash (SHA-256): 8708338d95dfe55902b67f81c71005ae3e7cf54ac8ded7d80e3f5cadf2009a0b
+
+📊 KPIs - ABA GERAL:
+  - Atendimentos Válidos: 4751
+  - Público Majoritário: Entidades sem fins lucrativos
+  - Total de Pessoas Únicas (Hashes): 4199
+  - Taxa de Retorno: 7.0% (293 pessoas retornaram)
+  - Total Folhas Impressas: 23305
+  - Datas Estimadas Esperadas: 477
+  - Linhas Ignoradas (Carimbo Inválido): 249
+
+🧠 PERFIL DO CONTRIBUINTE:
+  - Média de Idade Exata: 47.0 anos
+  - Distribuição de Gênero:
+    - Masculino: 1187
+    - Feminino: 1192
+    - Não Informado: 2372
+
+📈 FAIXAS ETÁRIAS:
+  - Até 25: 612
+  - 26 a 40: 1224
+  - 41 a 60: 1456
+  - Acima de 60: 1226
+  - Não Informado: 233
+
+🏢 PERFIL DO USUÁRIO:
+  - Pessoa Física: 944
+  - Pessoa Jurídica: 948
+  - Empresa Optante pelo Simples Nacional: 940
+  - Microempresa Optante pelo Simples Nacional: 954
+  - Entidades sem fins lucrativos: 965
+
+🌎 MUNICÍPIOS:
+  - São Paulo: 929
+  - Rio De Janeiro: 993
+  - Belo Horizonte: 928
+  - Curitiba: 936
+  - Guarulhos: 965
+
+⚙️ SERVIÇOS OPERACIONAIS (CATEGORIAS PRINCIPAIS):
+  - Imposto de Renda (IRPF): 736
+  - Cadastros (CPF e CNPJ): 1002
+  - Certidões e Situação Fiscal: 756
+  - MEI e Simples Nacional: 457
+  - Restituições e Isenções: 471
+  - Previdência e eSocial: 488
+  - Apoio e Sistemas: 757
+  - Comércio Exterior: 782
+  - NÃO ESPECIFICADO: 249
+
+==================================================
+📋 RELATÓRIO INDIVIDUAL - ARQUIVO 2
+==================================================
+Ficheiro: test/dados_naf_auditoria_2.csv
+Hash (SHA-256): 8d72ab68d21ae99494e3785e1693be3a3a33381c48fa1933f7bf9f23fc4bb86b
+
+📊 KPIs - ABA GERAL:
+  - Atendimentos Válidos: 4743
+  - Público Majoritário: Pessoa Jurídica
+  - Total de Pessoas Únicas (Hashes): 4170
+  - Taxa de Retorno: 7.3% (304 pessoas retornaram)
+  - Total Folhas Impressas: 23465
+  - Datas Estimadas Esperadas: 449
+  - Linhas Ignoradas (Carimbo Inválido): 257
+
+🧠 PERFIL DO CONTRIBUINTE:
+  - Média de Idade Exata: 46.9 anos
+  - Distribuição de Gênero:
+    - Masculino: 1214
+    - Feminino: 1193
+    - Não Informado: 2336
+
+📈 FAIXAS ETÁRIAS:
+  - Até 25: 633
+  - 26 a 40: 1230
+  - 41 a 60: 1395
+  - Acima de 60: 1249
+  - Não Informado: 236
+
+🏢 PERFIL DO USUÁRIO:
+  - Pessoa Física: 951
+  - Pessoa Jurídica: 971
+  - Empresa Optante pelo Simples Nacional: 945
+  - Microempresa Optante pelo Simples Nacional: 914
+  - Entidades sem fins lucrativos: 962
+
+🌎 MUNICÍPIOS:
+  - São Paulo: 974
+  - Rio De Janeiro: 946
+  - Belo Horizonte: 966
+  - Curitiba: 955
+  - Guarulhos: 902
+
+⚙️ SERVIÇOS OPERACIONAIS (CATEGORIAS PRINCIPAIS):
+  - Imposto de Renda (IRPF): 725
+  - Cadastros (CPF e CNPJ): 1003
+  - Certidões e Situação Fiscal: 735
+  - MEI e Simples Nacional: 466
+  - Restituições e Isenções: 532
+  - Previdência e eSocial: 484
+  - Apoio e Sistemas: 736
+  - Comércio Exterior: 725
+  - NÃO ESPECIFICADO: 255
+
+==================================================
+📋 RELATÓRIO INDIVIDUAL - ARQUIVO 3
+==================================================
+Ficheiro: test/dados_naf_auditoria_3.csv
+Hash (SHA-256): 9ada3e2a21668d501970eadd562da83df0a619cf3c16ae346866bc4186eb4382
+
+📊 KPIs - ABA GERAL:
+  - Atendimentos Válidos: 4752
+  - Público Majoritário: Entidades sem fins lucrativos
+  - Total de Pessoas Únicas (Hashes): 4223
+  - Taxa de Retorno: 6.9% (292 pessoas retornaram)
+  - Total Folhas Impressas: 24070
+  - Datas Estimadas Esperadas: 509
+  - Linhas Ignoradas (Carimbo Inválido): 248
+
+🧠 PERFIL DO CONTRIBUINTE:
+  - Média de Idade Exata: 46.7 anos
+  - Distribuição de Gênero:
+    - Masculino: 1219
+    - Feminino: 1185
+    - Não Informado: 2348
+
+📈 FAIXAS ETÁRIAS:
+  - Até 25: 612
+  - 26 a 40: 1240
+  - 41 a 60: 1468
+  - Acima de 60: 1199
+  - Não Informado: 233
+
+🏢 PERFIL DO USUÁRIO:
+  - Pessoa Física: 936
+  - Pessoa Jurídica: 942
+  - Empresa Optante pelo Simples Nacional: 966
+  - Microempresa Optante pelo Simples Nacional: 937
+  - Entidades sem fins lucrativos: 971
+
+🌎 MUNICÍPIOS:
+  - São Paulo: 974
+  - Rio De Janeiro: 921
+  - Belo Horizonte: 966
+  - Curitiba: 975
+  - Guarulhos: 916
+
+⚙️ SERVIÇOS OPERACIONAIS (CATEGORIAS PRINCIPAIS):
+  - Imposto de Renda (IRPF): 759
+  - Cadastros (CPF e CNPJ): 1002
+  - Certidões e Situação Fiscal: 756
+  - MEI e Simples Nacional: 481
+  - Restituições e Isenções: 506
+  - Previdência e eSocial: 510
+  - Apoio e Sistemas: 748
+  - Comércio Exterior: 738
+  - NÃO ESPECIFICADO: 244
+
+==================================================
+📋 RELATÓRIO CONSOLIDADO GERAL
+==================================================
+
+📊 KPIs - ABA GERAL:
+  - Atendimentos Válidos: 14246
+  - Público Majoritário: Entidades sem fins lucrativos
+  - Total de Pessoas Únicas (Hashes): 11793
+  - Taxa de Retorno: 4.2% (492 pessoas retornaram)
+  - Total Folhas Impressas: 70840
+  - Datas Estimadas Esperadas: 1435
+  - Linhas Ignoradas (Carimbo Inválido): 754
+
+🧠 PERFIL DO CONTRIBUINTE:
+  - Média de Idade Exata: 46.8 anos
+  - Distribuição de Gênero:
+    - Masculino: 3620
+    - Feminino: 3570
+    - Não Informado: 7056
+
+📈 FAIXAS ETÁRIAS:
+  - Até 25: 1857
+  - 26 a 40: 3694
+  - 41 a 60: 4319
+  - Acima de 60: 3674
+  - Não Informado: 702
+
+🏢 PERFIL DO USUÁRIO:
+  - Pessoa Física: 2831
+  - Pessoa Jurídica: 2861
+  - Empresa Optante pelo Simples Nacional: 2851
+  - Microempresa Optante pelo Simples Nacional: 2805
+  - Entidades sem fins lucrativos: 2898
+
+🌎 MUNICÍPIOS:
+  - São Paulo: 2877
+  - Rio De Janeiro: 2860
+  - Belo Horizonte: 2860
+  - Curitiba: 2866
+  - Guarulhos: 2783
+
+⚙️ SERVIÇOS OPERACIONAIS (CATEGORIAS PRINCIPAIS):
+  - Imposto de Renda (IRPF): 2220
+  - Cadastros (CPF e CNPJ): 3007
+  - Certidões e Situação Fiscal: 2247
+  - MEI e Simples Nacional: 1404
+  - Restituições e Isenções: 1509
+  - Previdência e eSocial: 1482
+  - Apoio e Sistemas: 2241
+  - Comércio Exterior: 2245
+  - NÃO ESPECIFICADO: 748

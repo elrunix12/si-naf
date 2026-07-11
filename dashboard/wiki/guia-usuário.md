@@ -11,6 +11,8 @@ O Dashboard é dividido em três áreas principais de análise, acessíveis pela
 * **Operacional (Serviços):** Detalhamento de quais tipos de serviços estão sendo mais demandados.
 * **Perfil do Contribuinte:** Análise demográfica (quem é o público que o NAF atende).
 
+![As três abas do Dashboard: Geral, Operacional e Perfil do Contribuinte](img/abas-dashboard.png)
+
 
 ## 2. Como Filtrar os Dados
 
@@ -23,12 +25,26 @@ Localizados no topo azul, estes filtros afetam **todos os gráficos e números**
 * **Ano:** Selecione um ano específico para análise.
 * **Mês:** Filtre por um mês específico ou veja o acumulado do ano ("Todos").
 * **Município:** Filtre atendimentos de uma cidade específica.
-* **Botão Limpar:** Reseta todos os filtros globais para o estado inicial.
+* **Botão Limpar:** Reseta **todos** os filtros da página para o estado inicial — inclusive os filtros locais das abas Operacional e Perfil, não só os globais deste cabeçalho.
+
+![Filtros globais no cabeçalho azul: Ano, Mês, Município e botão Limpar](img/filtros-globais.png)
 
 ### B. Filtros Locais (Dentro das Abas)
 
 Existem filtros cinzas dentro das abas "Operacional" e "Perfil". Eles servem para fazer **cruzamentos de dados específicos** (Ex: "Ver o perfil de gênero apenas de quem buscou o serviço de IRPF").
 
+
+**Aba Operacional**
+
+
+![Filtros locais cinzas dentro da aba Operacional](img/filtros-locais-operacional.png)
+
+
+
+**Aba Perfil**
+
+
+![Filtros locais cinzas dentro da aba Operacional](img/filtros-locais-perfil.png)
 
 ## 3. Entendendo os Indicadores (KPIs)
 
@@ -36,8 +52,10 @@ Na aba **Geral**, você encontrará quatro cartões principais:
 
 * **Pessoas Atendidas:** Volume total de registros únicos na linha do tempo.
 * **Público Majoritário:** O perfil de usuário que mais buscou os serviços.
-* **Taxa de Retorno:** A porcentagem de contribuintes (CPFs únicos e anonimizados) que voltaram ao NAF em dias diferentes (fidelização).
+* **Taxa de Retorno:** A porcentagem de contribuintes (identificados por hashes únicos e pseudonimizados do CPF) que voltaram ao NAF em dias diferentes (fidelização).
 * **Folhas Impressas:** Total de impressões geradas para o contribuinte.
+
+![Os quatro cartões de KPI na aba Geral](img/kpis-geral.png)
 
 **📊 A lógica das setas:**
 
@@ -59,6 +77,8 @@ No canto superior direito, há um botão com ícone de **olho**. Ele controla a 
 
 Esse botão funciona como um interruptor visual: ao clicar, os valores são exibidos ou ocultados diretamente nos gráficos.
 
+![Botão de valores nos dois estados: oculto (azul) e visível (amarelo)](img/botao-valores.png)
+
 ### Botão "Datas estimadas"
 
 Quando o Dashboard identifica registros com datas estimadas, aparece no canto superior direito um botão com ícone de **informação**.
@@ -77,6 +97,8 @@ A cor do botão indica o estado atual:
 
 Esse recurso ajuda a comparar os resultados com e sem registros estimados.
 
+![Janela explicativa do botão de Datas Estimadas, com a contagem de registros afetados](img/modal-datas-estimadas.png)
+
 ### Detalhar "Outros" (Drill-down)
 
 Na aba **Operacional**, o gráfico agrupa serviços pouco frequentes na categoria "Outros".
@@ -85,9 +107,13 @@ Na aba **Operacional**, o gráfico agrupa serviços pouco frequentes na categori
 2. O gráfico irá se transformar, mostrando o "Top 20" termos digitados manualmente pelos alunos no formulário.
 3. Clique em **"Voltar"** para retornar às categorias principais.
 
+![Gráfico antes e depois de clicar em Detalhar Outros, mostrando o Top 20 de termos digitados](img/drilldown-outros.png)
+
 ### Legendas de Gráficos
 
-Nos gráficos de pizza ou barras, você pode clicar nos itens da **Legenda** para desativar temporariamente aquela cor, permitindo focar apenas nos dados que restaram.
+Nos gráficos de pizza, você pode clicar nos itens da **Legenda** para desativar temporariamente aquela cor, permitindo focar apenas nos dados que restaram.
+
+![Clicando em um item da legenda para ocultar aquela categoria do gráfico](img/legenda-grafico.png)
 
 
 ## 5. Dicas de Interpretação
