@@ -15,6 +15,7 @@ No editor do Google Apps Script, você deve ter exatamente esta estrutura de arq
 2. **`index.html`**: A interface visual.
 3. **`Lib_ChartJS.html`**: Crie um novo arquivo HTML, apague todo o conteúdo e cole o código da biblioteca Chart.js.
 4. **`Lib_DataLabels.html`**: Crie um novo arquivo HTML e cole o código do plugin de rótulos de dados.
+5. **`style.html`**: Crie um novo arquivo HTML e cole o código contendo Tailwind CSS e estilos personalizados.
 
 ### B. Configuração das Fontes de Dados (Propriedades)
 
